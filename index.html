@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISTOPIA - enciclopédia</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Dancing+Script:wght@500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+
+        :root {
+            --bg-desk: #2b2b2b;
+            --paper-color: #fcf9f2;
+            --paper-dark: #f0e7d5;
+            --line-color: rgba(135, 206, 235, 0.5);
+            --margin-color: rgba(255, 105, 97, 0.6);
+            --text-color: #2c3e50;
+            --cover-color: #4a2e1b;
+            --line-height: 32px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-image: url('bg_principal.png');
+            background-size: cover; 
+            background-position: center;
+            background-color: #1a0000; 
+            font-family: var(--fonte-rpg, sans-serif);
+            font-weight: bold; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; 
+            overflow: hidden; 
+        }
+
+        /* Capa de Couro */
+        .book-cover {
+            position: relative; width: 95vw; max-width: 1400px; height: 92vh;
+            background-color: var(--cover-color); border-radius: 12px 22px 22px 12px;
+            box-shadow: 25px 25px 50px rgba(0,0,0,0.7), inset 0 0 40px rgba(0,0,0,0.5);
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .book-cover::before {
+            content: ''; position: absolute; top: 10px; bottom: 10px; left: 10px; right: 15px;
+            border: 2px dashed rgba(255, 255, 255, 0.15); border-radius: 8px 18px 18px 8px; pointer-events: none;
+        }
+
+        /* Miolo do Livro */
+        .book {
+            display: flex; width: calc(100% - 25px); height: calc(100% - 20px);
+            background-color: var(--paper-color); border-radius: 5px 15px 15px 5px;
+            box-shadow: inset 0 0 30px rgba(180, 160, 130, 0.2); position: relative;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        /* Lateral Esquerda (Organização) */
+        .left-page {
+            width: 30%; background: linear-gradient(to right, var(--paper-dark) 80%, #e6dac3 100%);
+            border-radius: 5px 0 0 5px; display: flex; flex-direction: column;
+            padding: 25px 15px 15px 25px; position: relative;
+        }
+
+        .sidebar-header {
+            font-family: 'Crimson Pro', serif; font-size: 26px; font-weight: 700;
+            border-bottom: 2px solid #d4c4a8; padding-bottom: 15px; margin-bottom: 10px;
+            text-align: center; color: #3a2b1f; text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+        }
+
+        /* Barra de Pesquisa */
+        .search-bar {
+            width: 100%; padding: 8px 12px; margin-bottom: 15px;
+            border: 1px solid #c2b59b; border-radius: 6px; background: rgba(255,255,255,0.5);
+            font-family: inherit; font-size: 14px; outline: none; transition: 0.3s;
+        }
+        .search-bar:focus { background: #fff; box-shadow: 0 0 5px rgba(200, 180, 150, 0.5); }
+
+        .tree-container { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+
+        .tree-item { margin: 2px 0; user-select: none; }
+        .tree-row {
+            display: flex; align-items: center; padding: 6px 8px; border-radius: 6px;
+            cursor: pointer; transition: all 0.2s; font-size: 15px; border: 1px solid transparent;
+        }
+        .tree-row:hover { background-color: rgba(139, 115, 85, 0.1); }
+        .tree-row.active { background-color: rgba(139, 115, 85, 0.2); font-weight: 600; }
+        .tree-row.drag-over { border: 1px dashed #4a2e1b; background-color: rgba(139, 115, 85, 0.3); }
+
+        .tree-icon { width: 20px; height: 20px; margin-right: 8px; display: flex; align-items: center; justify-content: center; color: #5a4634; }
+        .tree-icon svg { width: 100%; height: 100%; }
+        
+        .tree-title { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #3a2b1f; }
+        
+        .tree-actions { display: none; gap: 4px; }
+        .tree-row:hover .tree-actions { display: flex; }
+
+        .btn-icon {
+            background: rgba(255,255,255,0.5); border: 1px solid #d4c4a8; cursor: pointer;
+            width: 24px; height: 24px; border-radius: 4px; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; color: #5a4634;
+        }
+        .btn-icon:hover { background: #fff; transform: scale(1.1); }
+        .btn-delete:hover { color: #d32f2f; border-color: #d32f2f; }
+
+        .children-container { margin-left: 22px; border-left: 1px dashed #c2b59b; padding-left: 5px; }
+
+        .global-actions {
+            display: flex; flex-direction: column; gap: 8px; margin-top: 15px;
+            border-top: 2px solid #d4c4a8; padding-top: 15px;
+        }
+        .btn-main {
+            padding: 8px; border: 1px solid #c2b59b; background: rgba(255,255,255,0.4);
+            cursor: pointer; border-radius: 6px; font-family: inherit; font-weight: 600;
+            transition: 0.2s; color: #4a2e1b; display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-main svg { width: 16px; height: 16px; }
+        .btn-main:hover { background: rgba(255,255,255,0.8); }
+        .backup-group { display: flex; gap: 5px; }
+        .backup-group .btn-main { flex: 1; font-size: 12px; }
+
+        /* Lombada */
+        .binding {
+            width: 50px; background: linear-gradient(to right, #dcd0bc 0%, #c4b496 20%, #e0d4c0 50%, #c4b496 80%, #fdfaf6 100%);
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.3); z-index: 2; position: relative;
+        }
+        .binding::after {
+            content: ''; position: absolute; left: 24px; top: 0; bottom: 0;
+            width: 2px; background: rgba(0,0,0,0.1); box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+
+        /* Lateral Direita (Editor) */
+        .right-page {
+            width: calc(70% - 50px); display: flex; flex-direction: column; position: relative; background-color: transparent;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            padding: 10px 20px; background-color: rgba(230, 218, 195, 0.5);
+            border-bottom: 1px solid #d4c4a8; border-radius: 0 15px 0 0;
+            display: flex; gap: 8px; align-items: center; flex-wrap: wrap; z-index: 10;
+        }
+        .toolbar select, .toolbar button, .toolbar input[type="color"] {
+            height: 32px; border: 1px solid #c2b59b; background: #fff; color: #4a2e1b;
+            border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 14px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.05); transition: 0.2s; display: flex; align-items: center; justify-content: center;
+        }
+        .toolbar button { width: 32px; padding: 0; }
+        .toolbar select { padding: 0 10px; }
+        .toolbar button svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .toolbar button:hover, .toolbar select:hover { background: #f0e7d5; transform: translateY(-1px); }
+        .toolbar-divider { width: 1px; height: 24px; background-color: #c2b59b; margin: 0 4px; }
+
+        .editor-wrapper { flex-grow: 1; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Linha de Margem Vermelha */
+        .editor-wrapper::before {
+            content: ''; position: absolute; top: 0; bottom: 0; left: 60px;
+            width: 2px; background-color: var(--margin-color); z-index: 1; pointer-events: none;
+        }
+
+        #title-editor {
+            font-family: 'Crimson Pro', serif; font-size: 32px; font-weight: 700;
+            border: none; background: transparent; color: var(--text-color);
+            margin: 20px 40px 10px 80px; outline: none; z-index: 2;
+        }
+
+        /* O Editor */
+        #content-editor {
+            flex-grow: 1; padding: 0 40px 40px 80px; outline: none;
+            font-family: 'Lora', serif; font-size: 18px; position: relative; z-index: 2;
+            overflow-y: auto; scroll-behavior: smooth; color: #1a1a1a;
+            line-height: var(--line-height);
+        }
+
+        #content-editor p, #content-editor div { margin: 0; padding: 0; min-height: var(--line-height); }
+        #content-editor blockquote { 
+            border-left: 3px solid #8b7355; margin: 0 0 0 15px; padding-left: 15px; 
+            font-style: italic; color: #5a4634; background: rgba(139, 115, 85, 0.05);
+        }
+        #content-editor img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-top: 8px; display: inline-block; }
+
+        /* SISTEMA DE RESIZE DA IMAGEM */
+        .img-resizer {
+            position: absolute;
+            border: 2px dashed rgba(74, 46, 27, 0.7);
+            background: rgba(135, 206, 235, 0.1);
+            pointer-events: none; 
+            z-index: 100;
+            display: none;
+        }
+        .resizer-br {
+            position: absolute;
+            bottom: -7px;
+            right: -7px;
+            width: 14px;
+            height: 14px;
+            background-color: #fff;
+            border: 2px solid var(--cover-color);
+            border-radius: 50%;
+            cursor: se-resize;
+            pointer-events: all; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .resizer-br:hover { background-color: #e6dac3; transform: scale(1.2); transition: 0.1s; }
+
+        /* Rodapé de Status */
+        .page-footer {
+            padding: 8px 20px; background: rgba(230, 218, 195, 0.4);
+            border-top: 1px solid #d4c4a8; border-radius: 0 0 15px 0;
+            display: flex; justify-content: space-between; font-size: 12px; color: #666; font-family: sans-serif;
+        }
+
+        .page-turn-anim { animation: fadeInSlide 0.4s ease-out; }
+        @keyframes fadeInSlide {
+            0% { opacity: 0; transform: translateX(15px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c2b59b; border-radius: 10px; border: 2px solid var(--paper-color); }
+        ::-webkit-scrollbar-thumb:hover { background: #a69674; }
+        [contenteditable]:empty:before { content: attr(data-placeholder); color: #a39987; font-style: italic; }
+
+        #toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: #2c3e50; color: white; padding: 10px 20px; border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.3s; z-index: 1000; opacity: 0; font-family: sans-serif;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="book-cover">
+        <div class="book">
+            <!-- LATERAL ESQUERDA -->
+            <aside class="left-page" ondragover="event.preventDefault()" ondrop="handleRootDrop(event)">
+                <h2 class="sidebar-header">a Enciclopédia.</h2>
+                
+                <input type="text" id="search-bar" class="search-bar" placeholder="Buscar página..." oninput="filterTree()">
+
+                <div class="tree-container" id="tree-container"></div>
+                
+                <div class="global-actions">
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn-main" onclick="createNode(null, 'folder')" style="flex:1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
+                            Pasta
+                        </button>
+                        <button class="btn-main" onclick="createNode(null, 'page')" style="flex:1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                            Página
+                        </button>
+                    </div>
+                    <div class="backup-group">
+                        <button class="btn-main" onclick="exportBackup()" title="Salvar Backup">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Exportar
+                        </button>
+                        <button class="btn-main" onclick="document.getElementById('import-file').click()" title="Carregar Backup">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            Importar
+                        </button>
+                        <input type="file" id="import-file" style="display: none" accept=".json" onchange="importBackup(event)">
+                    </div>
+                </div>
+            </aside>
+
+            <div class="binding"></div>
+
+            <!-- LATERAL DIREITA (EDITOR) -->
+            <main class="right-page">
+                <div class="toolbar" id="toolbar">
+                    <select onchange="formatText('fontName', this.value)" title="Estilo de Fonte">
+                        <option value="'Lora', serif">Lora (Clássica)</option>
+                        <option value="'Crimson Pro', serif">Crimson (Livro)</option>
+                        <option value="'Dancing Script', cursive">Manuscrito</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                    </select>
+                    <select onchange="formatText('fontSize', this.value)" title="Tamanho">
+                        <option value="3">Normal</option>
+                        <option value="4">Grande</option>
+                        <option value="5">Subtítulo</option>
+                        <option value="6">Título</option>
+                    </select>
+                    
+                    <div class="toolbar-divider"></div>
+                    
+                    <button onclick="formatText('bold')" title="Negrito (Ctrl+B)"><svg viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path></svg></button>
+                    <button onclick="formatText('italic')" title="Itálico (Ctrl+I)"><svg viewBox="0 0 24 24"><line x1="19" y1="4" x2="10" y2="4"></line><line x1="14" y1="20" x2="5" y2="20"></line><line x1="15" y1="4" x2="9" y2="20"></line></svg></button>
+                    <button onclick="formatText('underline')" title="Sublinhado (Ctrl+U)"><svg viewBox="0 0 24 24"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path><line x1="4" y1="21" x2="20" y2="21"></line></svg></button>
+                    <button onclick="formatText('strikeThrough')" title="Riscado"><svg viewBox="0 0 24 24"><path d="M17.3 4.9c-2.3-.6-4.4-1-6.2-.9-2.7.2-5.3 1.1-7.1 2.9-1.3 1.3-2 3.1-2 5.1s.7 3.8 2 5.1c1.8 1.8 4.4 2.7 7.1 2.9 1.8.1 3.9-.3 6.2-.9"></path><line x1="3" y1="12" x2="21" y2="12"></line></svg></button>
+                    
+                    <div class="toolbar-divider"></div>
+
+                    <button onclick="formatText('insertUnorderedList')" title="Lista"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></button>
+                    <button onclick="formatText('justifyLeft')" title="Alinhar Esquerda"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="15" y2="12"></line><line x1="3" y1="18" x2="18" y2="18"></line></svg></button>
+                    <button onclick="formatText('justifyCenter')" title="Centralizar"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="6" y1="12" x2="18" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg></button>
+                    <button onclick="formatText('formatBlock', 'BLOCKQUOTE')" title="Citação"><svg viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"></path><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path></svg></button>
+                    
+                    <div class="toolbar-divider"></div>
+
+                    <input type="color" onchange="formatText('foreColor', this.value)" title="Cor do Texto" value="#2c3e50">
+                    <input type="color" onchange="formatText('hiliteColor', this.value)" title="Marca-texto (Cor de Fundo)" value="#ffff00">
+                </div>
+
+                <div class="editor-wrapper" id="editor-wrapper">
+                    <input type="text" id="title-editor" placeholder="Título da Página..." oninput="saveCurrentPage()">
+                    <div id="content-editor" contenteditable="true" data-placeholder="Comece a escrever aqui... (Use Ctrl+B, Ctrl+I, etc. Pode colar imagens!)" oninput="saveCurrentPage(); updateWordCount()"></div>
+                    
+                    <!-- Overlay Flutuante para Redimensionar Imagem -->
+                    <div id="img-resizer" class="img-resizer">
+                        <div class="resizer-br" id="resizer-handle" title="Arraste para redimensionar"></div>
+                    </div>
+                </div>
+
+                <!-- Barra de Status inferior -->
+                <div class="page-footer">
+                    <span id="save-status">Inicializando...</span>
+                    <span id="word-count">0 palavras | 0 caracteres</span>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <div id="toast">Ação concluída!</div>
+
+    <!-- SCRIPTS DO FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // ==== DICIONÁRIO DE ÍCONES SVG ====
+        const ICONS = {
+            folderClosed: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`,
+            folderOpen: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path><path d="M2 10h20"></path></svg>`,
+            page: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
+            trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+            addPage: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>`,
+            edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`
+        };
+
+        // ==== VARIÁVEIS GLOBAIS ====
+        let treeData = [];
+        let activePageId = null;
+        let draggedItemId = null; 
+
+        // ==========================================
+        //  CONFIGURAÇÃO DO FIREBASE
+        //  ⚠️ SUBSTITUA PELAS SUAS CHAVES DO CONSOLE!
+        // ==========================================
+const firebaseConfig = {
+
+  apiKey: "AIzaSyC--u_aq4ShfIGMD-cOS2rBOXCdzKEXhAE",
+
+  authDomain: "enciclopedia-a0293.firebaseapp.com",
+
+  projectId: "enciclopedia-a0293",
+
+  storageBucket: "enciclopedia-a0293.firebasestorage.app",
+
+  messagingSenderId: "47473080126",
+
+  appId: "1:47473080126:web:62bb18abb644cd6d971e6f",
+
+  measurementId: "G-608GJTQPEE"
+
+};
+
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Referência para salvar/ler o caderno inteiro num documento
+        const cadernoRef = db.collection("enciclopedia").doc("meuCadernoUnico");
+        
+        let saveTimeout = null; // Variável para controlar o delay de salvar na nuvem
+        // ==========================================
+
+        const treeContainer = document.getElementById('tree-container');
+        const titleEditor = document.getElementById('title-editor');
+        const contentEditor = document.getElementById('content-editor');
+        const wordCountEl = document.getElementById('word-count');
+        const searchBar = document.getElementById('search-bar');
+
+        // ==== VARIÁVEIS RESIZER (IMAGEM) ====
+        const imgResizer = document.getElementById('img-resizer');
+        const resizerHandle = document.getElementById('resizer-handle');
+        const editorWrapperEl = document.getElementById('editor-wrapper');
+        let currentResizingImg = null;
+        let isResizing = false;
+        let imgStartX, imgStartW, imgStartH;
+
+        // ==== INICIALIZAÇÃO ASSÍNCRONA ====
+        async function init() {
+            document.getElementById('save-status').textContent = 'Carregando da nuvem...';
+            
+            try {
+                // Tenta buscar do Firebase
+                const docSnap = await cadernoRef.get();
+                
+                if (docSnap.exists) {
+                    treeData = docSnap.data().treeData;
+                } else {
+                    // Se não existe na nuvem, checa o localStorage antigo ou cria default
+                    const savedLocal = localStorage.getItem('meuCadernoPremium');
+                    treeData = savedLocal ? JSON.parse(savedLocal) : createDefaultData();
+                    // Já salva essa estrutura inicial na nuvem
+                    saveData();
+                }
+            } catch (error) {
+                console.error("Erro ao buscar do Firebase. Usando modo Offline.", error);
+                const savedLocal = localStorage.getItem('meuCadernoPremium');
+                treeData = savedLocal ? JSON.parse(savedLocal) : createDefaultData();
+            }
+
+            const firstPage = findFirstPage(treeData);
+            if(firstPage) activePageId = firstPage.id;
+
+            renderTree();
+            if(activePageId) loadPage(activePageId, false);
+            
+            document.getElementById('save-status').textContent = 'Nuvem sincronizada ✔️';
+        }
+
+        function createDefaultData() {
+            return [{
+                id: generateId(), type: 'folder', title: 'Meu Diário', isOpen: true,
+                children: [ { id: generateId(), type: 'page', title: 'Primeira Página', content: '<div>Escreva seus pensamentos aqui...</div>' } ]
+            }];
+        }
+
+        // ==== LÓGICA DA ÁRVORE (PASTAS) ====
+        function renderTree(dataToRender = treeData) {
+            treeContainer.innerHTML = '';
+            dataToRender.forEach(node => treeContainer.appendChild(buildTreeNode(node)));
+        }
+
+        function buildTreeNode(node) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'tree-item';
+            
+            // Atributos de Drag & Drop
+            wrapper.draggable = true;
+            wrapper.addEventListener('dragstart', (e) => handleDragStart(e, node.id));
+            wrapper.addEventListener('dragover', (e) => handleDragOver(e, wrapper, node.type));
+            wrapper.addEventListener('dragleave', (e) => handleDragLeave(e, wrapper));
+            wrapper.addEventListener('drop', (e) => handleDrop(e, node.id, node.type, wrapper));
+
+            const row = document.createElement('div');
+            row.className = `tree-row ${node.id === activePageId ? 'active' : ''}`;
+            
+            const icon = document.createElement('div');
+            icon.className = 'tree-icon';
+            icon.innerHTML = node.type === 'folder' ? (node.isOpen ? ICONS.folderOpen : ICONS.folderClosed) : ICONS.page;
+
+            const title = document.createElement('div');
+            title.className = 'tree-title';
+            title.textContent = node.title || (node.type === 'folder' ? 'Nova Pasta' : 'Nova Página');
+
+            const actions = document.createElement('div');
+            actions.className = 'tree-actions';
+
+            // Botão de Renomear
+            const renameBtn = document.createElement('button');
+            renameBtn.className = 'btn-icon'; 
+            renameBtn.innerHTML = ICONS.edit; 
+            renameBtn.title = "Renomear";
+            renameBtn.onclick = (e) => { e.stopPropagation(); renameNode(node.id); };
+            actions.appendChild(renameBtn);
+
+            if (node.type === 'folder') {
+                const addPageBtn = document.createElement('button');
+                addPageBtn.className = 'btn-icon'; addPageBtn.innerHTML = ICONS.addPage; addPageBtn.title = "Nova página nesta pasta";
+                addPageBtn.onclick = (e) => { e.stopPropagation(); createNode(node.id, 'page'); };
+                actions.appendChild(addPageBtn);
+            }
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn-icon btn-delete'; delBtn.innerHTML = ICONS.trash; delBtn.title = "Excluir";
+            delBtn.onclick = (e) => { e.stopPropagation(); deleteNode(node.id); };
+            actions.appendChild(delBtn);
+
+            row.append(icon, title, actions);
+            
+            row.onclick = () => {
+                if (node.type === 'folder') {
+                    node.isOpen = !node.isOpen; saveData(); renderTree(treeData);
+                } else { loadPage(node.id, true); }
+            };
+            wrapper.appendChild(row);
+
+            if (node.type === 'folder' && node.isOpen && node.children) {
+                const childrenContainer = document.createElement('div');
+                childrenContainer.className = 'children-container';
+                node.children.forEach(child => childrenContainer.appendChild(buildTreeNode(child)));
+                wrapper.appendChild(childrenContainer);
+            }
+            return wrapper;
+        }
+
+        // ==== DRAG & DROP ====
+        function handleDragStart(e, id) {
+            draggedItemId = id;
+            e.dataTransfer.effectAllowed = 'move';
+            e.stopPropagation();
+        }
+
+        function handleDragOver(e, element, type) {
+            e.preventDefault();
+            e.stopPropagation();
+            element.querySelector('.tree-row').classList.add('drag-over');
+        }
+
+        function handleDragLeave(e, element) {
+            element.querySelector('.tree-row').classList.remove('drag-over');
+        }
+
+        function handleDrop(e, targetId, targetType, element) {
+            e.preventDefault();
+            e.stopPropagation();
+            element.querySelector('.tree-row').classList.remove('drag-over');
+            
+            if (!draggedItemId || draggedItemId === targetId) return;
+
+            if (isDescendant(draggedItemId, targetId)) {
+                showToast("Ação inválida: não é possível mover uma pasta para dentro de si mesma!");
+                return;
+            }
+
+            let draggedNode = extrairEApagarNode(draggedItemId);
+            if (!draggedNode) return;
+
+            if (targetType === 'folder') {
+                const targetFolder = findNode(treeData, targetId);
+                if (targetFolder) {
+                    targetFolder.children = targetFolder.children || [];
+                    targetFolder.children.push(draggedNode);
+                    targetFolder.isOpen = true;
+                }
+            } else {
+                const parent = findParent(treeData, targetId);
+                if (parent === null) { treeData.push(draggedNode); } 
+                else if (parent && parent.children) { parent.children.push(draggedNode); }
+            }
+
+            draggedItemId = null;
+            saveData(); renderTree(); searchBar.value = ''; 
+        }
+
+        function handleRootDrop(e) {
+            e.preventDefault();
+            if (!draggedItemId) return;
+            let draggedNode = extrairEApagarNode(draggedItemId);
+            if (draggedNode) { treeData.push(draggedNode); saveData(); renderTree(); }
+            draggedItemId = null;
+        }
+
+        function extrairEApagarNode(idProcurado) {
+            let nodeEncontrado = null;
+            function extractNode(nodes) {
+                for (let i = 0; i < nodes.length; i++) {
+                    if (nodes[i].id === idProcurado) {
+                        nodeEncontrado = nodes.splice(i, 1)[0];
+                        return true;
+                    }
+                    if (nodes[i].children && extractNode(nodes[i].children)) return true;
+                }
+                return false;
+            }
+            extractNode(treeData);
+            return nodeEncontrado;
+        }
+
+        function findParent(nodes, childId, parent = null) {
+            for (let node of nodes) {
+                if (node.id === childId) return parent;
+                if (node.children) {
+                    const found = findParent(node.children, childId, node);
+                    if (found !== undefined) return found; 
+                }
+            }
+            return undefined;
+        }
+
+        function isDescendant(parentId, childId) {
+            if (parentId === childId) return true;
+            const parentNode = findNode(treeData, parentId);
+            if (!parentNode || parentNode.type !== 'folder' || !parentNode.children) return false;
+            function check(nodes) {
+                for(let n of nodes) {
+                    if (n.id === childId) return true;
+                    if (n.children && check(n.children)) return true;
+                }
+                return false;
+            }
+            return check(parentNode.children);
+        }
+
+        // ==== PESQUISA ====
+        function filterTree() {
+            const term = searchBar.value.toLowerCase();
+            if (!term) { renderTree(treeData); return; }
+            const filteredData = treeData.map(node => filterNode(node, term)).filter(n => n !== null);
+            renderTree(filteredData);
+        }
+
+        function filterNode(node, term) {
+            const matches = node.title && node.title.toLowerCase().includes(term);
+            if (node.type === 'page') return matches ? { ...node } : null;
+            if (node.type === 'folder') {
+                const children = (node.children || []).map(child => filterNode(child, term)).filter(c => c !== null);
+                if (matches || children.length > 0) return { ...node, isOpen: true, children: children };
+            }
+            return null;
+        }
+
+        // ==== CRUD DE NÓS ====
+        function createNode(parentId, type) {
+            const newNode = { id: generateId(), type: type, title: type === 'folder' ? 'Nova Pasta' : 'Nova Página' };
+            if(type === 'folder') { newNode.children = []; newNode.isOpen = true; } else { newNode.content = ''; }
+
+            if (parentId === null) treeData.push(newNode);
+            else {
+                const parent = findNode(treeData, parentId);
+                if (parent && parent.type === 'folder') { parent.isOpen = true; parent.children.push(newNode); }
+            }
+            searchBar.value = ''; saveData();
+            if (type === 'page') loadPage(newNode.id, true); else renderTree();
+        }
+
+        function deleteNode(id) {
+            if (confirm('Deseja excluir este item permanentemente?')) {
+                treeData = removeNode(treeData, id);
+                if (id === activePageId || !findNode(treeData, activePageId)) {
+                    const firstPage = findFirstPage(treeData);
+                    if (firstPage) loadPage(firstPage.id, true);
+                    else { titleEditor.value = ''; contentEditor.innerHTML = ''; activePageId = null; updateWordCount(); }
+                }
+                saveData(); renderTree();
+            }
+        }
+
+        function renameNode(id) {
+            const node = findNode(treeData, id);
+            if (node) {
+                const novoNome = prompt('Digite o novo nome:', node.title);
+                if (novoNome !== null && novoNome.trim() !== '') {
+                    node.title = novoNome.trim();
+                    if (id === activePageId) titleEditor.value = node.title;
+                    saveData(); renderTree();
+                }
+            }
+        }
+
+        // ==== LÓGICA DE RESIZE DA IMAGEM ====
+        contentEditor.addEventListener('click', (e) => {
+            if (e.target.tagName === 'IMG') {
+                currentResizingImg = e.target;
+                updateResizerPosition();
+            } else {
+                currentResizingImg = null;
+                imgResizer.style.display = 'none';
+            }
+        });
+
+        contentEditor.addEventListener('scroll', () => { if (currentResizingImg) updateResizerPosition(); });
+        window.addEventListener('resize', () => { if (currentResizingImg) updateResizerPosition(); });
+
+        function updateResizerPosition() {
+            if (!currentResizingImg) {
+                imgResizer.style.display = 'none';
+                return;
+            }
+            
+            const contentRect = contentEditor.getBoundingClientRect();
+            const imgRect = currentResizingImg.getBoundingClientRect();
+            
+            // Oculta se rolar para fora da tela
+            if (imgRect.bottom < contentRect.top || imgRect.top > contentRect.bottom) {
+                 imgResizer.style.display = 'none';
+                 return;
+            }
+
+            const wrapperRect = editorWrapperEl.getBoundingClientRect();
+
+            imgResizer.style.display = 'block';
+            imgResizer.style.top = (imgRect.top - wrapperRect.top) + 'px';
+            imgResizer.style.left = (imgRect.left - wrapperRect.left) + 'px';
+            imgResizer.style.width = imgRect.width + 'px';
+            imgResizer.style.height = imgRect.height + 'px';
+        }
+
+        resizerHandle.addEventListener('mousedown', startResize);
+        resizerHandle.addEventListener('touchstart', startResize, {passive: false});
+
+        function startResize(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            isResizing = true;
+            
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            imgStartX = clientX;
+            imgStartW = currentResizingImg.offsetWidth;
+            imgStartH = currentResizingImg.offsetHeight;
+            
+            document.addEventListener('mousemove', resizeImg);
+            document.addEventListener('mouseup', stopResizeImg);
+            document.addEventListener('touchmove', resizeImg, {passive: false});
+            document.addEventListener('touchend', stopResizeImg);
+        }
+
+        function resizeImg(e) {
+            if (!isResizing || !currentResizingImg) return;
+            
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const dx = clientX - imgStartX;
+            
+            let newW = imgStartW + dx;
+            if (newW > 40) { 
+                currentResizingImg.style.width = newW + 'px';
+                currentResizingImg.style.height = 'auto'; 
+                updateResizerPosition();
+            }
+        }
+
+        function stopResizeImg(e) {
+            isResizing = false;
+            document.removeEventListener('mousemove', resizeImg);
+            document.removeEventListener('mouseup', stopResizeImg);
+            document.removeEventListener('touchmove', resizeImg);
+            document.removeEventListener('touchend', stopResizeImg);
+            saveCurrentPage();
+        }
+
+        // ==== CONTROLE DE PÁGINA ====
+        function loadPage(id, animate = true) {
+            const page = findNode(treeData, id);
+            if (page && page.type === 'page') {
+                activePageId = id;
+                titleEditor.value = page.title;
+                contentEditor.innerHTML = page.content;
+                
+                currentResizingImg = null;
+                if (imgResizer) imgResizer.style.display = 'none';
+
+                renderTree();
+                updateWordCount();
+                
+                if (animate) {
+                    contentEditor.classList.remove('page-turn-anim');
+                    titleEditor.classList.remove('page-turn-anim');
+                    void contentEditor.offsetWidth;
+                    contentEditor.classList.add('page-turn-anim');
+                    titleEditor.classList.add('page-turn-anim');
+                }
+            }
+        }
+
+        function saveCurrentPage() {
+            // Verifica se a imagem sendo editada foi apagada (ex: Backspace)
+            if (currentResizingImg && !document.body.contains(currentResizingImg)) {
+                currentResizingImg = null;
+                imgResizer.style.display = 'none';
+            } else if (currentResizingImg) {
+                updateResizerPosition();
+            }
+
+            if (!activePageId) return;
+            const page = findNode(treeData, activePageId);
+            if (page) {
+                page.title = titleEditor.value;
+                page.content = contentEditor.innerHTML;
+                const activeEl = document.querySelector('.tree-row.active .tree-title');
+                if(activeEl) activeEl.textContent = page.title || 'Sem título';
+                
+                // Dispara o salvamento (que agora tem integração Firebase com delay)
+                saveData();
+            }
+        }
+
+        // ==== SALVAR DADOS (FIREBASE E LOCALSTORAGE COM DEBOUNCE) ====
+        function saveData() {
+            // 1. Salva localmente imediatamente como garantia offline rápida
+            try { 
+                localStorage.setItem('meuCadernoPremium', JSON.stringify(treeData)); 
+            } catch (e) { 
+                console.warn("Memória local cheia."); 
+            }
+
+            // Atualiza status visual
+            const statusEl = document.getElementById('save-status');
+            statusEl.textContent = 'Salvando na nuvem...';
+
+            // 2. Sistema de Debounce (espera 1.5s antes de mandar pro Firebase)
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                cadernoRef.set({ treeData: treeData })
+                    .then(() => {
+                        statusEl.textContent = 'Salvo na nuvem ✔️';
+                    })
+                    .catch((error) => {
+                        console.error("Erro ao salvar no Firebase:", error);
+                        statusEl.textContent = 'Erro ao sincronizar ❌';
+                        showToast("Erro ao sincronizar com a nuvem. Verifique sua conexão.");
+                    });
+            }, 1500);
+        }
+
+        // ==== SISTEMA DE BACKUP ====
+        function exportBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(treeData));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "meu_caderno_backup_" + new Date().getTime() + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            showToast("Backup exportado com sucesso!");
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (Array.isArray(importedData)) {
+                        treeData = importedData;
+                        saveData(); init(); showToast("Caderno importado com sucesso!");
+                    } else { throw new Error(); }
+                } catch (err) { showToast("Erro ao importar arquivo inválido."); }
+            };
+            reader.readAsText(file);
+        }
+
+        // ==== UTILIDADES ====
+        function findNode(nodes, id) {
+            for (let node of nodes) {
+                if (node.id === id) return node;
+                if (node.children) { const found = findNode(node.children, id); if (found) return found; }
+            }
+            return null;
+        }
+
+        function removeNode(nodes, id) {
+            return nodes.filter(node => {
+                if (node.id === id) return false;
+                if (node.children) node.children = removeNode(node.children, id);
+                return true;
+            });
+        }
+
+        function findFirstPage(nodes) {
+            for (let node of nodes) {
+                if (node.type === 'page') return node;
+                if (node.children) { const found = findFirstPage(node.children); if (found) return found; }
+            }
+            return null;
+        }
+
+        function generateId() { return '_' + Math.random().toString(36).substr(2, 9); }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message; toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function updateWordCount() {
+            if(!activePageId) return;
+            const text = contentEditor.innerText || "";
+            const charCount = text.replace(/\s/g, '').length;
+            const words = text.trim().split(/\s+/);
+            const wordCount = text.trim() === "" ? 0 : words.length;
+            wordCountEl.textContent = `${wordCount} palavras | ${charCount} caracteres`;
+        }
+
+        // ==== EDITOR RICO ====
+        function formatText(command, value = null) {
+            document.execCommand(command, false, value);
+            contentEditor.focus(); saveCurrentPage();
+        }
+
+        // ==== COMPRESSÃO E INSERÇÃO DE IMAGENS ====
+        function handleImage(file) {
+            if (!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 700;
+                    let width = img.width; let height = img.height;
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    contentEditor.focus();
+                    document.execCommand('insertImage', false, dataUrl);
+                    saveCurrentPage();
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        contentEditor.addEventListener('paste', (e) => {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let item of items) {
+                if (item.type.indexOf('image') === 0) { e.preventDefault(); handleImage(item.getAsFile()); }
+            }
+        });
+
+        contentEditor.addEventListener('dragover', (e) => e.preventDefault());
+        contentEditor.addEventListener('drop', (e) => {
+            if(e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                e.preventDefault(); handleImage(e.dataTransfer.files[0]);
+            }
+        });
+
+        // Inicia tudo
+        init();
+    </script>
+</body>
+</html>
