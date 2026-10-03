@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DISTOPIA - enciclopédia</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Dancing+Script:wght@500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
@@ -230,6 +230,20 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.3s; z-index: 1000; opacity: 0; font-family: sans-serif;
         }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+		
+		@media (max-width: 768px) {
+    body { height: auto; overflow-y: auto; display: block; }
+    .book-cover { width: 100vw; height: auto; min-height: 100vh; border-radius: 0; box-shadow: none; }
+    .book { flex-direction: column; height: auto; border-radius: 0; }
+    .left-page { width: 100%; height: auto; border-radius: 0; }
+    .binding { display: none; } /* Esconde a lombada em celular */
+    .right-page { width: 100%; height: auto; }
+    
+    /* Melhora a toolbar para não quebrar */
+    .toolbar { flex-wrap: wrap; justify-content: center; }
+    #content-editor { padding: 20px; }
+    .editor-wrapper::before { left: 20px; } /* Ajusta a margem */
+}
     </style>
 </head>
 <body>
