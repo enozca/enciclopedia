@@ -154,12 +154,6 @@
 
         .editor-wrapper { flex-grow: 1; position: relative; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* Linha de Margem Vermelha */
-        .editor-wrapper::before {
-            content: ''; position: absolute; top: 0; bottom: 0; left: 50px;
-            width: 2px; background-color: var(--margin-color); z-index: 1; pointer-events: none;
-        }
-
         #title-editor {
             font-family: 'Crimson Pro', serif; font-size: 32px; font-weight: 700;
             border: none; background: transparent; color: var(--text-color);
