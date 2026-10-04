@@ -160,6 +160,20 @@
             margin: 20px 40px 10px 80px; outline: none; z-index: 2;
         }
 
+		.wiki-link {
+    cursor: pointer;
+    text-decoration: underline;
+}
+.link-exists {
+    color: #2980b9; /* Azul para links que existem */
+}
+.link-missing {
+    color: #c0392b; /* Vermelho para links que ainda não existem */
+}
+.wiki-link:hover {
+    font-weight: bold;
+}
+
         /* O Editor */
         #content-editor {
             flex-grow: 1; padding: 0 40px 40px 80px; outline: none;
