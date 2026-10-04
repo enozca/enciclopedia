@@ -803,27 +803,39 @@ async function loadPage(id, animate = true) {
 }
 
 function saveCurrentPage() {
+    // 1. Verificações de segurança para o resize de imagem
+    if (currentResizingImg && !document.body.contains(currentResizingImg)) {
+        currentResizingImg = null;
+        imgResizer.style.display = 'none';
+    } else if (currentResizingImg) {
+        updateResizerPosition();
+    }
+
     if (!activePageId) return;
+
+    // 2. CORREÇÃO: Limpeza do HTML para salvar apenas [[Título]]
+    // Criamos um elemento temporário para processar o conteúdo do editor
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = contentEditor.innerHTML;
     
-    // Pega o conteúdo atual e converte os links de volta para [[nome]]
-    let tempContent = contentEditor.innerHTML;
-    // Remove o span do link e mantém apenas o texto original
-    tempContent = tempContent.replace(/<span class="wiki-link.*?>(.*?)<\/span>/g, "[[$1]]");
-    
+    // Procura todos os links que criamos e converte de volta para [[Texto]]
+    const links = tempDiv.querySelectorAll('.wiki-link');
+    links.forEach(link => {
+        const text = link.textContent;
+        link.replaceWith(`[[${text}]]`);
+    });
+
+    // 3. Busca a página correta pelo ID (Aqui que estava o erro de "pageNode")
     const page = findNode(treeData, activePageId);
+    
     if (page) {
         page.title = titleEditor.value;
-        page.content = tempContent;
+        page.content = tempDiv.innerHTML; // Salva o conteúdo limpo
+        
         const activeEl = document.querySelector('.tree-row.active .tree-title');
-        if(activeEl) activeEl.textContent = pageNode.title;
+        if(activeEl) activeEl.textContent = page.title || 'Sem título';
         
-        // Salva a estrutura da árvore (agora leve, sem o conteúdo)
-        saveData(); 
-        
-        // Salva o conteúdo separadamente na coleção de páginas
-        paginasCollection.doc(activePageId).set({
-            content: contentEditor.innerHTML
-        }, { merge: true });
+        saveData();
     }
 }
 
