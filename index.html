@@ -394,6 +394,7 @@ const firebaseConfig = {
         const contentEditor = document.getElementById('content-editor');
         const wordCountEl = document.getElementById('word-count');
         const searchBar = document.getElementById('search-bar');
+		const paginasCollection = db.collection("paginas");
 
         // ==== VARIÁVEIS RESIZER (IMAGEM) ====
         const imgResizer = document.getElementById('img-resizer');
@@ -746,18 +747,27 @@ const firebaseConfig = {
         }
 
         // ==== CONTROLE DE PÁGINA ====
-        function loadPage(id, animate = true) {
-            const page = findNode(treeData, id);
-            if (page && page.type === 'page') {
-                activePageId = id;
-                titleEditor.value = page.title;
-                contentEditor.innerHTML = page.content;
-                
-                currentResizingImg = null;
-                if (imgResizer) imgResizer.style.display = 'none';
+async function loadPage(id, animate = true) {
+    const pageNode = findNode(treeData, id);
+    if (!pageNode || pageNode.type !== 'page') return;
 
-                renderTree();
-                updateWordCount();
+    activePageId = id;
+    titleEditor.value = pageNode.title;
+    
+    // Mostra status de carregamento
+    contentEditor.innerHTML = "Carregando...";
+
+    try {
+        // Busca o conteúdo real no Firestore na coleção separada
+        const doc = await paginasCollection.doc(id).get();
+        if (doc.exists) {
+            contentEditor.innerHTML = doc.data().content;
+        } else {
+            contentEditor.innerHTML = "<div>Comece a escrever aqui...</div>";
+        }
+    } catch (e) {
+        contentEditor.innerHTML = "Erro ao carregar conteúdo.";
+    }
                 
                 if (animate) {
                     contentEditor.classList.remove('page-turn-anim');
@@ -769,55 +779,35 @@ const firebaseConfig = {
             }
         }
 
-        function saveCurrentPage() {
-            // Verifica se a imagem sendo editada foi apagada (ex: Backspace)
-            if (currentResizingImg && !document.body.contains(currentResizingImg)) {
-                currentResizingImg = null;
-                imgResizer.style.display = 'none';
-            } else if (currentResizingImg) {
-                updateResizerPosition();
-            }
-
-            if (!activePageId) return;
-            const page = findNode(treeData, activePageId);
-            if (page) {
-                page.title = titleEditor.value;
-                page.content = contentEditor.innerHTML;
-                const activeEl = document.querySelector('.tree-row.active .tree-title');
-                if(activeEl) activeEl.textContent = page.title || 'Sem título';
-                
-                // Dispara o salvamento (que agora tem integração Firebase com delay)
-                saveData();
-            }
-        }
+function saveCurrentPage() {
+    if (!activePageId) return;
+    
+    const pageNode = findNode(treeData, activePageId);
+    if (pageNode) {
+        pageNode.title = titleEditor.value;
+        const activeEl = document.querySelector('.tree-row.active .tree-title');
+        if(activeEl) activeEl.textContent = pageNode.title;
+        
+        // Salva a estrutura da árvore (agora leve, sem o conteúdo)
+        saveData(); 
+        
+        // Salva o conteúdo separadamente na coleção de páginas
+        paginasCollection.doc(activePageId).set({
+            content: contentEditor.innerHTML
+        }, { merge: true });
+    }
+}
 
         // ==== SALVAR DADOS (FIREBASE E LOCALSTORAGE COM DEBOUNCE) ====
-        function saveData() {
-            // 1. Salva localmente imediatamente como garantia offline rápida
-            try { 
-                localStorage.setItem('meuCadernoPremium', JSON.stringify(treeData)); 
-            } catch (e) { 
-                console.warn("Memória local cheia."); 
-            }
-
-            // Atualiza status visual
-            const statusEl = document.getElementById('save-status');
-            statusEl.textContent = 'Salvando na nuvem...';
-
-            // 2. Sistema de Debounce (espera 1.5s antes de mandar pro Firebase)
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
-                cadernoRef.set({ treeData: treeData })
-                    .then(() => {
-                        statusEl.textContent = 'Salvo na nuvem ✔️';
-                    })
-                    .catch((error) => {
-                        console.error("Erro ao salvar no Firebase:", error);
-                        statusEl.textContent = 'Erro ao sincronizar ❌';
-                        showToast("Erro ao sincronizar com a nuvem. Verifique sua conexão.");
-                    });
-            }, 1500);
-        }
+function saveData() {
+    // Apenas salva a estrutura (IDs e títulos), nunca o conteúdo enorme
+    // Isso garante que você NUNCA atingirá o limite de 1MB do Firestore
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+        cadernoRef.set({ treeData: treeData });
+        document.getElementById('save-status').textContent = 'Sincronizado ✔️';
+    }, 1000);
+}
 
         // ==== SISTEMA DE BACKUP ====
         function exportBackup() {
