@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DISTOPIA - enciclopédia</title>
-		    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="shortcut icon" href="favicon.ico">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Dancing+Script:wght@500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
 
+        /* ==========================================================================
+           VARIÁVEIS GLOBAIS E RESET
+           ========================================================================== */
         :root {
             --bg-desk: #2b2b2b;
             --paper-color: #fcf9f2;
@@ -17,16 +20,21 @@
             --text-color: #2c3e50;
             --cover-color: #4a2e1b;
             --line-height: 32px;
+            --fonte-rpg: sans-serif;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             background-image: url('bg_principal.png');
             background-size: cover; 
             background-position: center;
             background-color: #1a0000; 
-            font-family: var(--fonte-rpg, sans-serif);
+            font-family: var(--fonte-rpg);
             font-weight: bold; 
             display: flex;
             justify-content: center;
@@ -35,147 +43,376 @@
             overflow: hidden; 
         }
 
-        /* Capa de Couro */
+        /* ==========================================================================
+           CAPA E ESTRUTURA DO LIVRO
+           ========================================================================== */
         .book-cover {
-            position: relative; width: 95vw; max-width: 1400px; height: 92vh;
-            background-color: var(--cover-color); border-radius: 12px 22px 22px 12px;
+            position: relative;
+            width: 95vw;
+            max-width: 1400px;
+            height: 92vh;
+            background-color: var(--cover-color);
+            border-radius: 12px 22px 22px 12px;
             box-shadow: 25px 25px 50px rgba(0,0,0,0.7), inset 0 0 40px rgba(0,0,0,0.5);
-            display: flex; justify-content: center; align-items: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .book-cover::before {
-            content: ''; position: absolute; top: 10px; bottom: 10px; left: 10px; right: 15px;
-            border: 2px dashed rgba(255, 255, 255, 0.15); border-radius: 8px 18px 18px 8px; pointer-events: none;
+            content: '';
+            position: absolute;
+            top: 10px;
+            bottom: 10px;
+            left: 10px;
+            right: 15px;
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 8px 18px 18px 8px;
+            pointer-events: none;
         }
 
-        /* Miolo do Livro */
         .book {
-            display: flex; width: calc(100% - 25px); height: calc(100% - 20px);
-            background-color: var(--paper-color); border-radius: 5px 15px 15px 5px;
-            box-shadow: inset 0 0 30px rgba(180, 160, 130, 0.2); position: relative;
+            display: flex;
+            width: calc(100% - 25px);
+            height: calc(100% - 20px);
+            background-color: var(--paper-color);
+            border-radius: 5px 15px 15px 5px;
+            box-shadow: inset 0 0 30px rgba(180, 160, 130, 0.2);
+            position: relative;
             background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
         }
 
-        /* Lateral Esquerda (Organização) */
+        /* ==========================================================================
+           LATERAL ESQUERDA (NAVEGAÇÃO/ÁRVORE)
+           ========================================================================== */
         .left-page {
-            width: 30%; background: linear-gradient(to right, var(--paper-dark) 80%, #e6dac3 100%);
-            border-radius: 5px 0 0 5px; display: flex; flex-direction: column;
-            padding: 25px 15px 15px 25px; position: relative;
+            width: 30%;
+            background: linear-gradient(to right, var(--paper-dark) 80%, #e6dac3 100%);
+            border-radius: 5px 0 0 5px;
+            display: flex;
+            flex-direction: column;
+            padding: 25px 15px 15px 25px;
+            position: relative;
         }
 
         .sidebar-header {
-            font-family: 'Crimson Pro', serif; font-size: 26px; font-weight: 700;
-            border-bottom: 2px solid #d4c4a8; padding-bottom: 15px; margin-bottom: 10px;
-            text-align: center; color: #3a2b1f; text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+            font-family: 'Crimson Pro', serif;
+            font-size: 26px;
+            font-weight: 700;
+            border-bottom: 2px solid #d4c4a8;
+            padding-bottom: 15px;
+            margin-bottom: 10px;
+            text-align: center;
+            color: #3a2b1f;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
         }
 
-        /* Barra de Pesquisa */
         .search-bar {
-            width: 100%; padding: 8px 12px; margin-bottom: 15px;
-            border: 1px solid #c2b59b; border-radius: 6px; background: rgba(255,255,255,0.5);
-            font-family: inherit; font-size: 14px; outline: none; transition: 0.3s;
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 15px;
+            border: 1px solid #c2b59b;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.5);
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
         }
-        .search-bar:focus { background: #fff; box-shadow: 0 0 5px rgba(200, 180, 150, 0.5); }
 
-        .tree-container { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+        .search-bar:focus {
+            background: #fff;
+            box-shadow: 0 0 5px rgba(200, 180, 150, 0.5);
+        }
 
-        .tree-item { margin: 2px 0; user-select: none; }
+        .tree-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .tree-item {
+            margin: 2px 0;
+            user-select: none;
+        }
+
         .tree-row {
-            display: flex; align-items: center; padding: 6px 8px; border-radius: 6px;
-            cursor: pointer; transition: all 0.2s; font-size: 15px; border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 15px;
+            border: 1px solid transparent;
         }
-        .tree-row:hover { background-color: rgba(139, 115, 85, 0.1); }
-        .tree-row.active { background-color: rgba(139, 115, 85, 0.2); font-weight: 600; }
-        .tree-row.drag-over { border: 1px dashed #4a2e1b; background-color: rgba(139, 115, 85, 0.3); }
 
-        .tree-icon { width: 20px; height: 20px; margin-right: 8px; display: flex; align-items: center; justify-content: center; color: #5a4634; }
-        .tree-icon svg { width: 100%; height: 100%; }
+        .tree-row:hover {
+            background-color: rgba(139, 115, 85, 0.1);
+        }
+
+        .tree-row.active {
+            background-color: rgba(139, 115, 85, 0.2);
+            font-weight: 600;
+        }
+
+        .tree-row.drag-over {
+            border: 1px dashed #4a2e1b;
+            background-color: rgba(139, 115, 85, 0.3);
+        }
+
+        .tree-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5a4634;
+        }
+
+        .tree-icon svg {
+            width: 100%;
+            height: 100%;
+        }
         
-        .tree-title { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #3a2b1f; }
+        .tree-title {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #3a2b1f;
+        }
         
-        .tree-actions { display: none; gap: 4px; }
-        .tree-row:hover .tree-actions { display: flex; }
+        .tree-actions {
+            display: none;
+            gap: 4px;
+        }
+
+        .tree-row:hover .tree-actions {
+            display: flex;
+        }
 
         .btn-icon {
-            background: rgba(255,255,255,0.5); border: 1px solid #d4c4a8; cursor: pointer;
-            width: 24px; height: 24px; border-radius: 4px; transition: 0.2s;
-            display: flex; align-items: center; justify-content: center; color: #5a4634;
+            background: rgba(255,255,255,0.5);
+            border: 1px solid #d4c4a8;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5a4634;
         }
-        .btn-icon:hover { background: #fff; transform: scale(1.1); }
-        .btn-delete:hover { color: #d32f2f; border-color: #d32f2f; }
 
-        .children-container { margin-left: 22px; border-left: 1px dashed #c2b59b; padding-left: 5px; }
+        .btn-icon:hover {
+            background: #fff;
+            transform: scale(1.1);
+        }
+
+        .btn-delete:hover {
+            color: #d32f2f;
+            border-color: #d32f2f;
+        }
+
+        .children-container {
+            margin-left: 22px;
+            border-left: 1px dashed #c2b59b;
+            padding-left: 5px;
+        }
 
         .global-actions {
-            display: flex; flex-direction: column; gap: 8px; margin-top: 15px;
-            border-top: 2px solid #d4c4a8; padding-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 15px;
+            border-top: 2px solid #d4c4a8;
+            padding-top: 15px;
         }
+
         .btn-main {
-            padding: 8px; border: 1px solid #c2b59b; background: rgba(255,255,255,0.4);
-            cursor: pointer; border-radius: 6px; font-family: inherit; font-weight: 600;
-            transition: 0.2s; color: #4a2e1b; display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 8px;
+            border: 1px solid #c2b59b;
+            background: rgba(255,255,255,0.4);
+            cursor: pointer;
+            border-radius: 6px;
+            font-family: inherit;
+            font-weight: 600;
+            transition: 0.2s;
+            color: #4a2e1b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
-        .btn-main svg { width: 16px; height: 16px; }
-        .btn-main:hover { background: rgba(255,255,255,0.8); }
-        .backup-group { display: flex; gap: 5px; }
-        .backup-group .btn-main { flex: 1; font-size: 12px; }
 
-        /* Lombada */
+        .btn-main svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-main:hover {
+            background: rgba(255,255,255,0.8);
+        }
+
+        .backup-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .backup-group .btn-main {
+            flex: 1;
+            font-size: 12px;
+        }
+
+        /* ==========================================================================
+           LOMBADA DO LIVRO
+           ========================================================================== */
         .binding {
-            width: 50px; background: linear-gradient(to right, #dcd0bc 0%, #c4b496 20%, #e0d4c0 50%, #c4b496 80%, #fdfaf6 100%);
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.3); z-index: 2; position: relative;
+            width: 50px;
+            background: linear-gradient(to right, #dcd0bc 0%, #c4b496 20%, #e0d4c0 50%, #c4b496 80%, #fdfaf6 100%);
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.3);
+            z-index: 2;
+            position: relative;
         }
+
         .binding::after {
-            content: ''; position: absolute; left: 24px; top: 0; bottom: 0;
-            width: 2px; background: rgba(0,0,0,0.1); box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: rgba(0,0,0,0.1);
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
 
-        /* Lateral Direita (Editor) */
+        /* ==========================================================================
+           LATERAL DIREITA (EDITOR)
+           ========================================================================== */
         .right-page {
-            width: calc(70% - 50px); display: flex; flex-direction: column; position: relative; background-color: transparent;
+            width: calc(70% - 50px);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: transparent;
         }
 
-        /* Toolbar */
         .toolbar {
-            padding: 10px 20px; background-color: rgba(230, 218, 195, 0.5);
-            border-bottom: 1px solid #d4c4a8; border-radius: 0 15px 0 0;
-            display: flex; gap: 8px; align-items: center; flex-wrap: wrap; z-index: 10;
+            padding: 10px 20px;
+            background-color: rgba(230, 218, 195, 0.5);
+            border-bottom: 1px solid #d4c4a8;
+            border-radius: 0 15px 0 0;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            z-index: 10;
         }
+
         .toolbar select, .toolbar button, .toolbar input[type="color"] {
-            height: 32px; border: 1px solid #c2b59b; background: #fff; color: #4a2e1b;
-            border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 14px;
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.05); transition: 0.2s; display: flex; align-items: center; justify-content: center;
+            height: 32px;
+            border: 1px solid #c2b59b;
+            background: #fff;
+            color: #4a2e1b;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.05);
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
         .toolbar button { width: 32px; padding: 0; }
         .toolbar select { padding: 0 10px; }
-        .toolbar button svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .toolbar button:hover, .toolbar select:hover { background: #f0e7d5; transform: translateY(-1px); }
-        .toolbar-divider { width: 1px; height: 24px; background-color: #c2b59b; margin: 0 4px; }
-
-        .editor-wrapper { flex-grow: 1; position: relative; display: flex; flex-direction: column; overflow: hidden; }
-
-        #title-editor {
-            font-family: 'Crimson Pro', serif; font-size: 32px; font-weight: 700;
-            border: none; background: transparent; color: var(--text-color);
-            margin: 20px 40px 10px 80px; outline: none; z-index: 2;
+        .toolbar button svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        
+        .toolbar button:hover, .toolbar select:hover {
+            background: #f0e7d5;
+            transform: translateY(-1px);
         }
 
-        /* O Editor */
+        .toolbar-divider {
+            width: 1px;
+            height: 24px;
+            background-color: #c2b59b;
+            margin: 0 4px;
+        }
+
+        .editor-wrapper {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #title-editor {
+            font-family: 'Crimson Pro', serif;
+            font-size: 32px;
+            font-weight: 700;
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            margin: 20px 40px 10px 80px;
+            outline: none;
+            z-index: 2;
+        }
+
         #content-editor {
-            flex-grow: 1; padding: 0 40px 40px 80px; outline: none;
-            font-family: 'Lora', serif; font-size: 18px; position: relative; z-index: 2;
-            overflow-y: auto; scroll-behavior: smooth; color: #1a1a1a;
+            flex-grow: 1;
+            padding: 0 40px 40px 80px;
+            outline: none;
+            font-family: 'Lora', serif;
+            font-size: 18px;
+            position: relative;
+            z-index: 2;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            color: #1a1a1a;
             line-height: var(--line-height);
         }
 
-        #content-editor p, #content-editor div { margin: 0; padding: 0; min-height: var(--line-height); }
-        #content-editor blockquote { 
-            border-left: 3px solid #8b7355; margin: 0 0 0 15px; padding-left: 15px; 
-            font-style: italic; color: #5a4634; background: rgba(139, 115, 85, 0.05);
+        #content-editor p, #content-editor div {
+            margin: 0;
+            padding: 0;
+            min-height: var(--line-height);
         }
-        #content-editor img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-top: 8px; display: inline-block; }
 
-        /* SISTEMA DE RESIZE DA IMAGEM */
+        #content-editor blockquote { 
+            border-left: 3px solid #8b7355;
+            margin: 0 0 0 15px;
+            padding-left: 15px; 
+            font-style: italic;
+            color: #5a4634;
+            background: rgba(139, 115, 85, 0.05);
+        }
+
+        #content-editor img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-top: 8px;
+            display: inline-block;
+        }
+
+        /* ==========================================================================
+           RESIZE DE IMAGENS
+           ========================================================================== */
         .img-resizer {
             position: absolute;
             border: 2px dashed rgba(74, 46, 27, 0.7);
@@ -184,6 +421,7 @@
             z-index: 100;
             display: none;
         }
+
         .resizer-br {
             position: absolute;
             bottom: -7px;
@@ -197,75 +435,113 @@
             pointer-events: all; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
-        .resizer-br:hover { background-color: #e6dac3; transform: scale(1.2); transition: 0.1s; }
 
-        /* Rodapé de Status */
-        .page-footer {
-            padding: 8px 20px; background: rgba(230, 218, 195, 0.4);
-            border-top: 1px solid #d4c4a8; border-radius: 0 0 15px 0;
-            display: flex; justify-content: space-between; font-size: 12px; color: #666; font-family: sans-serif;
+        .resizer-br:hover {
+            background-color: #e6dac3;
+            transform: scale(1.2);
+            transition: 0.1s;
         }
 
-        .page-turn-anim { animation: fadeInSlide 0.4s ease-out; }
+        /* ==========================================================================
+           RODAPÉ E ANIMAÇÕES
+           ========================================================================== */
+        .page-footer {
+            padding: 8px 20px;
+            background: rgba(230, 218, 195, 0.4);
+            border-top: 1px solid #d4c4a8;
+            border-radius: 0 0 15px 0;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+            font-family: sans-serif;
+        }
+
+        .page-turn-anim {
+            animation: fadeInSlide 0.4s ease-out;
+        }
+
         @keyframes fadeInSlide {
             0% { opacity: 0; transform: translateX(15px); }
             100% { opacity: 1; transform: translateX(0); }
         }
 
-        /* Scrollbars */
+        /* Scrollbars Customizadas */
         ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #c2b59b; border-radius: 10px; border: 2px solid var(--paper-color); }
         ::-webkit-scrollbar-thumb:hover { background: #a69674; }
-        [contenteditable]:empty:before { content: attr(data-placeholder); color: #a39987; font-style: italic; }
-
-        #toast {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
-            background: #2c3e50; color: white; padding: 10px 20px; border-radius: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.3s; z-index: 1000; opacity: 0; font-family: sans-serif;
+        
+        [contenteditable]:empty:before {
+            content: attr(data-placeholder);
+            color: #a39987;
+            font-style: italic;
         }
-        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* Toast Notifications */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: 0.3s;
+            z-index: 1000;
+            opacity: 0;
+            font-family: sans-serif;
+        }
+
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
 		
+        /* ==========================================================================
+           RESPONSIVIDADE (MOBILE)
+           ========================================================================== */
 		@media (max-width: 768px) {
-    body { height: auto; overflow-y: auto; display: block; }
-    .book-cover { width: 100vw; height: auto; min-height: 100vh; border-radius: 0; box-shadow: none; }
-    .book { flex-direction: column; height: auto; border-radius: 0; }
-    .left-page { width: 100%; height: auto; border-radius: 0; }
-    .binding { display: none; } /* Esconde a lombada em celular */
-    .right-page { width: 100%; height: auto; }
-    
-    /* Melhora a toolbar para não quebrar */
-    .toolbar { flex-wrap: wrap; justify-content: center; }
-    #content-editor { padding: 20px; }
-    .editor-wrapper::before { left: 20px; } /* Ajusta a margem */
-}
+            body { height: auto; overflow-y: auto; display: block; }
+            .book-cover { width: 100vw; height: auto; min-height: 100vh; border-radius: 0; box-shadow: none; }
+            .book { flex-direction: column; height: auto; border-radius: 0; }
+            .left-page { width: 100%; height: auto; border-radius: 0; }
+            .binding { display: none; }
+            .right-page { width: 100%; height: auto; }
+            .toolbar { flex-wrap: wrap; justify-content: center; }
+            #content-editor { padding: 20px; }
+            .editor-wrapper::before { left: 20px; }
+            #title-editor { margin: 20px; }
+        }
     </style>
 </head>
 <body>
 
     <div class="book-cover">
         <div class="book">
-            <!-- LATERAL ESQUERDA -->
-            <aside class="left-page" ondragover="event.preventDefault()" ondrop="handleRootDrop(event)">
+            <!-- ================= LATERAL ESQUERDA ================= -->
+            <aside class="left-page" ondragover="event.preventDefault()" ondrop="TreeManager.handleRootDrop(event)">
                 <h2 class="sidebar-header">a Enciclopédia.</h2>
                 
-                <input type="text" id="search-bar" class="search-bar" placeholder="Buscar página..." oninput="filterTree()">
+                <input type="text" id="search-bar" class="search-bar" placeholder="Buscar página..." oninput="TreeManager.filterTree()">
 
                 <div class="tree-container" id="tree-container"></div>
                 
                 <div class="global-actions">
                     <div style="display: flex; gap: 5px;">
-                        <button class="btn-main" onclick="createNode(null, 'folder')" style="flex:1">
+                        <button class="btn-main" onclick="TreeManager.createNode(null, 'folder')" style="flex:1">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
                             Pasta
                         </button>
-                        <button class="btn-main" onclick="createNode(null, 'page')" style="flex:1">
+                        <button class="btn-main" onclick="TreeManager.createNode(null, 'page')" style="flex:1">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
                             Página
                         </button>
                     </div>
                     <div class="backup-group">
-                        <button class="btn-main" onclick="exportBackup()" title="Salvar Backup">
+                        <button class="btn-main" onclick="AppUtils.exportBackup()" title="Salvar Backup">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                             Exportar
                         </button>
@@ -273,23 +549,23 @@
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                             Importar
                         </button>
-                        <input type="file" id="import-file" style="display: none" accept=".json" onchange="importBackup(event)">
+                        <input type="file" id="import-file" style="display: none" accept=".json" onchange="AppUtils.importBackup(event)">
                     </div>
                 </div>
             </aside>
 
             <div class="binding"></div>
 
-            <!-- LATERAL DIREITA (EDITOR) -->
+            <!-- ================= LATERAL DIREITA (EDITOR) ================= -->
             <main class="right-page">
                 <div class="toolbar" id="toolbar">
-                    <select onchange="formatText('fontName', this.value)" title="Estilo de Fonte">
+                    <select onchange="EditorManager.formatText('fontName', this.value)" title="Estilo de Fonte">
                         <option value="'Lora', serif">Lora (Clássica)</option>
                         <option value="'Crimson Pro', serif">Crimson (Livro)</option>
                         <option value="'Dancing Script', cursive">Manuscrito</option>
                         <option value="Arial, sans-serif">Arial</option>
                     </select>
-                    <select onchange="formatText('fontSize', this.value)" title="Tamanho">
+                    <select onchange="EditorManager.formatText('fontSize', this.value)" title="Tamanho">
                         <option value="3">Normal</option>
                         <option value="4">Grande</option>
                         <option value="5">Subtítulo</option>
@@ -298,27 +574,27 @@
                     
                     <div class="toolbar-divider"></div>
                     
-                    <button onclick="formatText('bold')" title="Negrito (Ctrl+B)"><svg viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path></svg></button>
-                    <button onclick="formatText('italic')" title="Itálico (Ctrl+I)"><svg viewBox="0 0 24 24"><line x1="19" y1="4" x2="10" y2="4"></line><line x1="14" y1="20" x2="5" y2="20"></line><line x1="15" y1="4" x2="9" y2="20"></line></svg></button>
-                    <button onclick="formatText('underline')" title="Sublinhado (Ctrl+U)"><svg viewBox="0 0 24 24"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path><line x1="4" y1="21" x2="20" y2="21"></line></svg></button>
-                    <button onclick="formatText('strikeThrough')" title="Riscado"><svg viewBox="0 0 24 24"><path d="M17.3 4.9c-2.3-.6-4.4-1-6.2-.9-2.7.2-5.3 1.1-7.1 2.9-1.3 1.3-2 3.1-2 5.1s.7 3.8 2 5.1c1.8 1.8 4.4 2.7 7.1 2.9 1.8.1 3.9-.3 6.2-.9"></path><line x1="3" y1="12" x2="21" y2="12"></line></svg></button>
+                    <button onclick="EditorManager.formatText('bold')" title="Negrito (Ctrl+B)"><svg viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path></svg></button>
+                    <button onclick="EditorManager.formatText('italic')" title="Itálico (Ctrl+I)"><svg viewBox="0 0 24 24"><line x1="19" y1="4" x2="10" y2="4"></line><line x1="14" y1="20" x2="5" y2="20"></line><line x1="15" y1="4" x2="9" y2="20"></line></svg></button>
+                    <button onclick="EditorManager.formatText('underline')" title="Sublinhado (Ctrl+U)"><svg viewBox="0 0 24 24"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path><line x1="4" y1="21" x2="20" y2="21"></line></svg></button>
+                    <button onclick="EditorManager.formatText('strikeThrough')" title="Riscado"><svg viewBox="0 0 24 24"><path d="M17.3 4.9c-2.3-.6-4.4-1-6.2-.9-2.7.2-5.3 1.1-7.1 2.9-1.3 1.3-2 3.1-2 5.1s.7 3.8 2 5.1c1.8 1.8 4.4 2.7 7.1 2.9 1.8.1 3.9-.3 6.2-.9"></path><line x1="3" y1="12" x2="21" y2="12"></line></svg></button>
                     
                     <div class="toolbar-divider"></div>
 
-                    <button onclick="formatText('insertUnorderedList')" title="Lista"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></button>
-                    <button onclick="formatText('justifyLeft')" title="Alinhar Esquerda"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="15" y2="12"></line><line x1="3" y1="18" x2="18" y2="18"></line></svg></button>
-                    <button onclick="formatText('justifyCenter')" title="Centralizar"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="6" y1="12" x2="18" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg></button>
-                    <button onclick="formatText('formatBlock', 'BLOCKQUOTE')" title="Citação"><svg viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"></path><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path></svg></button>
+                    <button onclick="EditorManager.formatText('insertUnorderedList')" title="Lista"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></button>
+                    <button onclick="EditorManager.formatText('justifyLeft')" title="Alinhar Esquerda"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="15" y2="12"></line><line x1="3" y1="18" x2="18" y2="18"></line></svg></button>
+                    <button onclick="EditorManager.formatText('justifyCenter')" title="Centralizar"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="6" y1="12" x2="18" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg></button>
+                    <button onclick="EditorManager.formatText('formatBlock', 'BLOCKQUOTE')" title="Citação"><svg viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"></path><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path></svg></button>
                     
                     <div class="toolbar-divider"></div>
 
-                    <input type="color" onchange="formatText('foreColor', this.value)" title="Cor do Texto" value="#2c3e50">
-                    <input type="color" onchange="formatText('hiliteColor', this.value)" title="Marca-texto (Cor de Fundo)" value="#ffff00">
+                    <input type="color" onchange="EditorManager.formatText('foreColor', this.value)" title="Cor do Texto" value="#2c3e50">
+                    <input type="color" onchange="EditorManager.formatText('hiliteColor', this.value)" title="Marca-texto (Cor de Fundo)" value="#ffff00">
                 </div>
 
                 <div class="editor-wrapper" id="editor-wrapper">
-                    <input type="text" id="title-editor" placeholder="Título da Página..." oninput="saveCurrentPage()">
-                    <div id="content-editor" contenteditable="true" data-placeholder="Comece a escrever aqui... (Use Ctrl+B, Ctrl+I, etc. Pode colar imagens!)" oninput="saveCurrentPage(); updateWordCount()"></div>
+                    <input type="text" id="title-editor" placeholder="Título da Página..." oninput="EditorManager.saveCurrentPage()">
+                    <div id="content-editor" contenteditable="true" data-placeholder="Comece a escrever aqui... (Use Ctrl+B, Ctrl+I, etc. Pode colar imagens!)" oninput="EditorManager.saveCurrentPage(); EditorManager.updateWordCount()"></div>
                     
                     <!-- Overlay Flutuante para Redimensionar Imagem -->
                     <div id="img-resizer" class="img-resizer">
@@ -342,7 +618,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
     <script>
-        // ==== DICIONÁRIO DE ÍCONES SVG ====
+        /**
+         * Dicionário de Ícones SVG
+         */
         const ICONS = {
             folderClosed: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`,
             folderOpen: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path><path d="M2 10h20"></path></svg>`,
@@ -352,545 +630,653 @@
             edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`
         };
 
-        // ==== VARIÁVEIS GLOBAIS ====
-        let treeData = [];
-        let activePageId = null;
-        let draggedItemId = null; 
+        /**
+         * Elementos do DOM e Variáveis de Estado
+         */
+        const DOM = {
+            treeContainer: document.getElementById('tree-container'),
+            titleEditor: document.getElementById('title-editor'),
+            contentEditor: document.getElementById('content-editor'),
+            wordCount: document.getElementById('word-count'),
+            searchBar: document.getElementById('search-bar'),
+            saveStatus: document.getElementById('save-status'),
+            toast: document.getElementById('toast'),
+            imgResizer: document.getElementById('img-resizer'),
+            resizerHandle: document.getElementById('resizer-handle'),
+            editorWrapper: document.getElementById('editor-wrapper')
+        };
 
-        // ==========================================
-        //  CONFIGURAÇÃO DO FIREBASE
-        // ==========================================
+        const AppState = {
+            treeData: [],
+            activePageId: null,
+            draggedItemId: null,
+            saveTimeout: null,
+            currentResizingImg: null,
+            isResizing: false,
+            imgStartX: 0,
+            imgStartW: 0,
+            imgStartH: 0
+        };
+
+        /**
+         * Configuração do Firebase
+         */
         const firebaseConfig = {
-          apiKey: "AIzaSyC--u_aq4ShfIGMD-cOS2rBOXCdzKEXhAE",
-          authDomain: "enciclopedia-a0293.firebaseapp.com",
-          projectId: "enciclopedia-a0293",
-          storageBucket: "enciclopedia-a0293.firebasestorage.app",
-          messagingSenderId: "47473080126",
-          appId: "1:47473080126:web:62bb18abb644cd6d971e6f",
-          measurementId: "G-608GJTQPEE"
+            apiKey: "AIzaSyC--u_aq4ShfIGMD-cOS2rBOXCdzKEXhAE",
+            authDomain: "enciclopedia-a0293.firebaseapp.com",
+            projectId: "enciclopedia-a0293",
+            storageBucket: "enciclopedia-a0293.firebasestorage.app",
+            messagingSenderId: "47473080126",
+            appId: "1:47473080126:web:62bb18abb644cd6d971e6f",
+            measurementId: "G-608GJTQPEE"
         };
         
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        
         const cadernoRef = db.collection("enciclopedia").doc("meuCadernoUnico");
         const paginasCollection = db.collection("paginas");
-        
-        let saveTimeout = null;
 
-        const treeContainer = document.getElementById('tree-container');
-        const titleEditor = document.getElementById('title-editor');
-        const contentEditor = document.getElementById('content-editor');
-        const wordCountEl = document.getElementById('word-count');
-        const searchBar = document.getElementById('search-bar');
-
-        // ==== VARIÁVEIS RESIZER (IMAGEM) ====
-        const imgResizer = document.getElementById('img-resizer');
-        const resizerHandle = document.getElementById('resizer-handle');
-        const editorWrapperEl = document.getElementById('editor-wrapper');
-        let currentResizingImg = null;
-        let isResizing = false;
-        let imgStartX, imgStartW, imgStartH;
-
-        // ==== INICIALIZAÇÃO ASSÍNCRONA ====
-        async function init() {
-            document.getElementById('save-status').textContent = 'Carregando da nuvem...';
+        /**
+         * Utilitários Gerais
+         */
+        const AppUtils = {
+            generateId: () => '_' + Math.random().toString(36).substr(2, 9),
             
-            try {
-                const docSnap = await cadernoRef.get();
-                
-                if (docSnap.exists) {
-                    treeData = docSnap.data().treeData;
-                } else {
-                    const savedLocal = localStorage.getItem('meuCadernoPremium');
-                    treeData = savedLocal ? JSON.parse(savedLocal) : createDefaultData();
-                    saveData();
-                }
-            } catch (error) {
-                console.error("Erro ao buscar do Firebase. Usando modo Offline.", error);
-                const savedLocal = localStorage.getItem('meuCadernoPremium');
-                treeData = savedLocal ? JSON.parse(savedLocal) : createDefaultData();
-            }
-
-            const firstPage = findFirstPage(treeData);
-            if(firstPage) activePageId = firstPage.id;
-
-            renderTree();
-            if(activePageId) loadPage(activePageId, false);
+            showToast: (message) => {
+                DOM.toast.textContent = message;
+                DOM.toast.classList.add('show');
+                setTimeout(() => DOM.toast.classList.remove('show'), 3000);
+            },
             
-            document.getElementById('save-status').textContent = 'Nuvem sincronizada ✔️';
-        }
+            exportBackup: () => {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(AppState.treeData));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", `meu_caderno_backup_${new Date().getTime()}.json`);
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                AppUtils.showToast("Backup exportado com sucesso!");
+            },
 
-        function createDefaultData() {
-            return [{
-                id: generateId(), type: 'folder', title: 'Meu Diário', isOpen: true,
-                children: [ { id: generateId(), type: 'page', title: 'Primeira Página' } ]
-            }];
-        }
-
-        // ==== LÓGICA DA ÁRVORE (PASTAS) ====
-        function renderTree(dataToRender = treeData) {
-            treeContainer.innerHTML = '';
-            dataToRender.forEach(node => treeContainer.appendChild(buildTreeNode(node)));
-        }
-
-        function buildTreeNode(node) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'tree-item';
-            
-            wrapper.draggable = true;
-            wrapper.addEventListener('dragstart', (e) => handleDragStart(e, node.id));
-            wrapper.addEventListener('dragover', (e) => handleDragOver(e, wrapper, node.type));
-            wrapper.addEventListener('dragleave', (e) => handleDragLeave(e, wrapper));
-            wrapper.addEventListener('drop', (e) => handleDrop(e, node.id, node.type, wrapper));
-
-            const row = document.createElement('div');
-            row.className = `tree-row ${node.id === activePageId ? 'active' : ''}`;
-            
-            const icon = document.createElement('div');
-            icon.className = 'tree-icon';
-            icon.innerHTML = node.type === 'folder' ? (node.isOpen ? ICONS.folderOpen : ICONS.folderClosed) : ICONS.page;
-
-            const title = document.createElement('div');
-            title.className = 'tree-title';
-            title.textContent = node.title || (node.type === 'folder' ? 'Nova Pasta' : 'Nova Página');
-
-            const actions = document.createElement('div');
-            actions.className = 'tree-actions';
-
-            const renameBtn = document.createElement('button');
-            renameBtn.className = 'btn-icon'; 
-            renameBtn.innerHTML = ICONS.edit; 
-            renameBtn.title = "Renomear";
-            renameBtn.onclick = (e) => { e.stopPropagation(); renameNode(node.id); };
-            actions.appendChild(renameBtn);
-
-            if (node.type === 'folder') {
-                const addPageBtn = document.createElement('button');
-                addPageBtn.className = 'btn-icon'; addPageBtn.innerHTML = ICONS.addPage; addPageBtn.title = "Nova página nesta pasta";
-                addPageBtn.onclick = (e) => { e.stopPropagation(); createNode(node.id, 'page'); };
-                actions.appendChild(addPageBtn);
-            }
-
-            const delBtn = document.createElement('button');
-            delBtn.className = 'btn-icon btn-delete'; delBtn.innerHTML = ICONS.trash; delBtn.title = "Excluir";
-            delBtn.onclick = (e) => { e.stopPropagation(); deleteNode(node.id); };
-            actions.appendChild(delBtn);
-
-            row.append(icon, title, actions);
-            
-            row.onclick = () => {
-                if (node.type === 'folder') {
-                    node.isOpen = !node.isOpen; saveData(); renderTree(treeData);
-                } else { loadPage(node.id, true); }
-            };
-            wrapper.appendChild(row);
-
-            if (node.type === 'folder' && node.isOpen && node.children) {
-                const childrenContainer = document.createElement('div');
-                childrenContainer.className = 'children-container';
-                node.children.forEach(child => childrenContainer.appendChild(buildTreeNode(child)));
-                wrapper.appendChild(childrenContainer);
-            }
-            return wrapper;
-        }
-
-        // ==== DRAG & DROP ====
-        function handleDragStart(e, id) {
-            draggedItemId = id;
-            e.dataTransfer.effectAllowed = 'move';
-            e.stopPropagation();
-        }
-
-        function handleDragOver(e, element, type) {
-            e.preventDefault();
-            e.stopPropagation();
-            element.querySelector('.tree-row').classList.add('drag-over');
-        }
-
-        function handleDragLeave(e, element) {
-            element.querySelector('.tree-row').classList.remove('drag-over');
-        }
-
-        function handleDrop(e, targetId, targetType, element) {
-            e.preventDefault();
-            e.stopPropagation();
-            element.querySelector('.tree-row').classList.remove('drag-over');
-            
-            if (!draggedItemId || draggedItemId === targetId) return;
-
-            if (isDescendant(draggedItemId, targetId)) {
-                showToast("Ação inválida: não é possível mover uma pasta para dentro de si mesma!");
-                return;
-            }
-
-            let draggedNode = extrairEApagarNode(draggedItemId);
-            if (!draggedNode) return;
-
-            if (targetType === 'folder') {
-                const targetFolder = findNode(treeData, targetId);
-                if (targetFolder) {
-                    targetFolder.children = targetFolder.children || [];
-                    targetFolder.children.push(draggedNode);
-                    targetFolder.isOpen = true;
-                }
-            } else {
-                const parent = findParent(treeData, targetId);
-                if (parent === null) { treeData.push(draggedNode); } 
-                else if (parent && parent.children) { parent.children.push(draggedNode); }
-            }
-
-            draggedItemId = null;
-            saveData(); renderTree(); searchBar.value = ''; 
-        }
-
-        function handleRootDrop(e) {
-            e.preventDefault();
-            if (!draggedItemId) return;
-            let draggedNode = extrairEApagarNode(draggedItemId);
-            if (draggedNode) { treeData.push(draggedNode); saveData(); renderTree(); }
-            draggedItemId = null;
-        }
-
-        function extrairEApagarNode(idProcurado) {
-            let nodeEncontrado = null;
-            function extractNode(nodes) {
-                for (let i = 0; i < nodes.length; i++) {
-                    if (nodes[i].id === idProcurado) {
-                        nodeEncontrado = nodes.splice(i, 1)[0];
-                        return true;
+            importBackup: (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (Array.isArray(importedData)) {
+                            AppState.treeData = importedData;
+                            Database.saveTreeData();
+                            App.init(); 
+                            AppUtils.showToast("Caderno importado com sucesso!");
+                        } else { 
+                            throw new Error("Formato inválido."); 
+                        }
+                    } catch (err) { 
+                        AppUtils.showToast("Erro: O arquivo de backup é inválido."); 
                     }
-                    if (nodes[i].children && extractNode(nodes[i].children)) return true;
-                }
-                return false;
+                };
+                reader.readAsText(file);
+                event.target.value = ''; // Reseta o input
             }
-            extractNode(treeData);
-            return nodeEncontrado;
-        }
+        };
 
-        function findParent(nodes, childId, parent = null) {
-            for (let node of nodes) {
-                if (node.id === childId) return parent;
-                if (node.children) {
-                    const found = findParent(node.children, childId, node);
-                    if (found !== undefined) return found; 
-                }
-            }
-            return undefined;
-        }
-
-        function isDescendant(parentId, childId) {
-            if (parentId === childId) return true;
-            const parentNode = findNode(treeData, parentId);
-            if (!parentNode || parentNode.type !== 'folder' || !parentNode.children) return false;
-            function check(nodes) {
-                for(let n of nodes) {
-                    if (n.id === childId) return true;
-                    if (n.children && check(n.children)) return true;
-                }
-                return false;
-            }
-            return check(parentNode.children);
-        }
-
-        // ==== PESQUISA ====
-        function filterTree() {
-            const term = searchBar.value.toLowerCase();
-            if (!term) { renderTree(treeData); return; }
-            const filteredData = treeData.map(node => filterNode(node, term)).filter(n => n !== null);
-            renderTree(filteredData);
-        }
-
-        function filterNode(node, term) {
-            const matches = node.title && node.title.toLowerCase().includes(term);
-            if (node.type === 'page') return matches ? { ...node } : null;
-            if (node.type === 'folder') {
-                const children = (node.children || []).map(child => filterNode(child, term)).filter(c => c !== null);
-                if (matches || children.length > 0) return { ...node, isOpen: true, children: children };
-            }
-            return null;
-        }
-
-        // ==== CRUD DE NÓS ====
-        function createNode(parentId, type) {
-            const newNode = { id: generateId(), type: type, title: type === 'folder' ? 'Nova Pasta' : 'Nova Página' };
-            if(type === 'folder') { newNode.children = []; newNode.isOpen = true; }
-
-            if (parentId === null) treeData.push(newNode);
-            else {
-                const parent = findNode(treeData, parentId);
-                if (parent && parent.type === 'folder') { parent.isOpen = true; parent.children.push(newNode); }
-            }
-            searchBar.value = ''; saveData();
-            if (type === 'page') loadPage(newNode.id, true); else renderTree();
-        }
-
-        function deleteNode(id) {
-            if (confirm('Deseja excluir este item permanentemente?')) {
-                treeData = removeNode(treeData, id);
-                if (id === activePageId || !findNode(treeData, activePageId)) {
-                    const firstPage = findFirstPage(treeData);
-                    if (firstPage) loadPage(firstPage.id, true);
-                    else { titleEditor.value = ''; contentEditor.innerHTML = ''; activePageId = null; updateWordCount(); }
-                }
-                saveData(); renderTree();
-            }
-        }
-
-        function renameNode(id) {
-            const node = findNode(treeData, id);
-            if (node) {
-                const novoNome = prompt('Digite o novo nome:', node.title);
-                if (novoNome !== null && novoNome.trim() !== '') {
-                    node.title = novoNome.trim();
-                    if (id === activePageId) titleEditor.value = node.title;
-                    saveData(); renderTree();
-                }
-            }
-        }
-
-        // ==== LÓGICA DE RESIZE DA IMAGEM ====
-        contentEditor.addEventListener('click', (e) => {
-            if (e.target.tagName === 'IMG') {
-                currentResizingImg = e.target;
-                updateResizerPosition();
-            } else {
-                currentResizingImg = null;
-                imgResizer.style.display = 'none';
-            }
-        });
-
-        contentEditor.addEventListener('scroll', () => { if (currentResizingImg) updateResizerPosition(); });
-        window.addEventListener('resize', () => { if (currentResizingImg) updateResizerPosition(); });
-
-        function updateResizerPosition() {
-            if (!currentResizingImg) {
-                imgResizer.style.display = 'none';
-                return;
-            }
-            
-            const contentRect = contentEditor.getBoundingClientRect();
-            const imgRect = currentResizingImg.getBoundingClientRect();
-            
-            if (imgRect.bottom < contentRect.top || imgRect.top > contentRect.bottom) {
-                 imgResizer.style.display = 'none';
-                 return;
-            }
-
-            const wrapperRect = editorWrapperEl.getBoundingClientRect();
-
-            imgResizer.style.display = 'block';
-            imgResizer.style.top = (imgRect.top - wrapperRect.top) + 'px';
-            imgResizer.style.left = (imgRect.left - wrapperRect.left) + 'px';
-            imgResizer.style.width = imgRect.width + 'px';
-            imgResizer.style.height = imgRect.height + 'px';
-        }
-
-        resizerHandle.addEventListener('mousedown', startResize);
-        resizerHandle.addEventListener('touchstart', startResize, {passive: false});
-
-        function startResize(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            isResizing = true;
-            
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            imgStartX = clientX;
-            imgStartW = currentResizingImg.offsetWidth;
-            imgStartH = currentResizingImg.offsetHeight;
-            
-            document.addEventListener('mousemove', resizeImg);
-            document.addEventListener('mouseup', stopResizeImg);
-            document.addEventListener('touchmove', resizeImg, {passive: false});
-            document.addEventListener('touchend', stopResizeImg);
-        }
-
-        function resizeImg(e) {
-            if (!isResizing || !currentResizingImg) return;
-            
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const dx = clientX - imgStartX;
-            
-            let newW = imgStartW + dx;
-            if (newW > 40) { 
-                currentResizingImg.style.width = newW + 'px';
-                currentResizingImg.style.height = 'auto'; 
-                updateResizerPosition();
-            }
-        }
-
-        function stopResizeImg(e) {
-            isResizing = false;
-            document.removeEventListener('mousemove', resizeImg);
-            document.removeEventListener('mouseup', stopResizeImg);
-            document.removeEventListener('touchmove', resizeImg);
-            document.removeEventListener('touchend', stopResizeImg);
-            saveCurrentPage();
-        }
-
-        // ==== CONTROLE DE PÁGINA ====
-        async function loadPage(id, animate = true) {
-            const pageNode = findNode(treeData, id);
-            if (!pageNode || pageNode.type !== 'page') return;
-
-            activePageId = id;
-            titleEditor.value = pageNode.title;
-            contentEditor.innerHTML = "Carregando...";
-
-            try {
-                const doc = await paginasCollection.doc(id).get();
-                if (doc.exists) {
-                    contentEditor.innerHTML = doc.data().content || "";
-                } else {
-                    contentEditor.innerHTML = "<div>Comece a escrever aqui...</div>";
-                }
-            } catch (e) {
-                contentEditor.innerHTML = "Erro ao carregar conteúdo.";
-            }
-
-            renderTree();
-            updateWordCount();
-                
-            if (animate) {
-                contentEditor.classList.remove('page-turn-anim');
-                titleEditor.classList.remove('page-turn-anim');
-                void contentEditor.offsetWidth;
-                contentEditor.classList.add('page-turn-anim');
-                titleEditor.classList.add('page-turn-anim');
-            }
-        }
-
-        function saveCurrentPage() {
-            if (!activePageId) return;
-            
-            const pageNode = findNode(treeData, activePageId);
-            if (pageNode) {
-                pageNode.title = titleEditor.value;
-                const activeEl = document.querySelector('.tree-row.active .tree-title');
-                if(activeEl) activeEl.textContent = pageNode.title;
-                
-                saveData(); 
-                
-                paginasCollection.doc(activePageId).set({
-                    content: contentEditor.innerHTML
-                }, { merge: true });
-
-                updateWordCount();
-            }
-        }
-
-        // ==== SALVAR DADOS (FIREBASE COM DEBOUNCE) ====
-        function saveData() {
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
-                cadernoRef.set({ treeData: treeData });
-                document.getElementById('save-status').textContent = 'Sincronizado ✔️';
-            }, 1000);
-        }
-
-        // ==== SISTEMA DE BACKUP ====
-        function exportBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(treeData));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "meu_caderno_backup_" + new Date().getTime() + ".json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-            showToast("Backup exportado com sucesso!");
-        }
-
-        function importBackup(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
+        /**
+         * Interações de Banco de Dados
+         */
+        const Database = {
+            async loadData() {
+                DOM.saveStatus.textContent = 'Carregando da nuvem...';
                 try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (Array.isArray(importedData)) {
-                        treeData = importedData;
-                        saveData(); init(); showToast("Caderno importado com sucesso!");
-                    } else { throw new Error(); }
-                } catch (err) { showToast("Erro ao importar arquivo inválido."); }
-            };
-            reader.readAsText(file);
-        }
+                    const docSnap = await cadernoRef.get();
+                    if (docSnap.exists) {
+                        AppState.treeData = docSnap.data().treeData;
+                    } else {
+                        AppState.treeData = TreeManager.createDefaultData();
+                        this.saveTreeData();
+                    }
+                } catch (error) {
+                    console.warn("Aviso: Falha ao carregar do Firebase. Carregando dados padrão.", error);
+                    AppState.treeData = TreeManager.createDefaultData();
+                }
+                DOM.saveStatus.textContent = 'Nuvem sincronizada ✔️';
+            },
 
-        // ==== UTILIDADES ====
-        function findNode(nodes, id) {
-            for (let node of nodes) {
-                if (node.id === id) return node;
-                if (node.children) { const found = findNode(node.children, id); if (found) return found; }
+            saveTreeData() {
+                clearTimeout(AppState.saveTimeout);
+                AppState.saveTimeout = setTimeout(() => {
+                    cadernoRef.set({ treeData: AppState.treeData })
+                        .then(() => DOM.saveStatus.textContent = 'Sincronizado ✔️')
+                        .catch(() => DOM.saveStatus.textContent = 'Erro ao sincronizar ❌');
+                }, 1000);
+            },
+
+            async getPageContent(id) {
+                try {
+                    const doc = await paginasCollection.doc(id).get();
+                    return doc.exists ? doc.data().content : "<div>Comece a escrever aqui...</div>";
+                } catch (e) {
+                    console.error("Erro ao carregar o conteúdo da página:", e);
+                    return "Erro ao carregar conteúdo.";
+                }
+            },
+
+            async savePageContent(id, content) {
+                try {
+                    await paginasCollection.doc(id).set({ content }, { merge: true });
+                } catch (e) {
+                    console.error("Erro ao salvar o conteúdo da página:", e);
+                }
             }
-            return null;
-        }
+        };
 
-        function removeNode(nodes, id) {
-            return nodes.filter(node => {
-                if (node.id === id) return false;
-                if (node.children) node.children = removeNode(node.children, id);
-                return true;
-            });
-        }
+        /**
+         * Lógica da Árvore de Pastas e Páginas
+         */
+        const TreeManager = {
+            createDefaultData: () => [{
+                id: AppUtils.generateId(), type: 'folder', title: 'Meu Diário', isOpen: true,
+                children: [ { id: AppUtils.generateId(), type: 'page', title: 'Primeira Página' } ]
+            }],
 
-        function findFirstPage(nodes) {
-            for (let node of nodes) {
-                if (node.type === 'page') return node;
-                if (node.children) { const found = findFirstPage(node.children); if (found) return found; }
+            renderTree: (dataToRender = AppState.treeData) => {
+                DOM.treeContainer.innerHTML = '';
+                dataToRender.forEach(node => DOM.treeContainer.appendChild(TreeManager.buildTreeNode(node)));
+            },
+
+            buildTreeNode: (node) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'tree-item';
+                wrapper.draggable = true;
+                
+                // Eventos de Drag & Drop
+                wrapper.addEventListener('dragstart', (e) => TreeManager.handleDragStart(e, node.id));
+                wrapper.addEventListener('dragover', (e) => { e.preventDefault(); wrapper.querySelector('.tree-row').classList.add('drag-over'); });
+                wrapper.addEventListener('dragleave', (e) => wrapper.querySelector('.tree-row').classList.remove('drag-over'));
+                wrapper.addEventListener('drop', (e) => TreeManager.handleDrop(e, node.id, node.type, wrapper));
+
+                const row = document.createElement('div');
+                row.className = `tree-row ${node.id === AppState.activePageId ? 'active' : ''}`;
+                
+                const icon = document.createElement('div');
+                icon.className = 'tree-icon';
+                icon.innerHTML = node.type === 'folder' ? (node.isOpen ? ICONS.folderOpen : ICONS.folderClosed) : ICONS.page;
+
+                const title = document.createElement('div');
+                title.className = 'tree-title';
+                title.textContent = node.title || (node.type === 'folder' ? 'Nova Pasta' : 'Nova Página');
+
+                const actions = document.createElement('div');
+                actions.className = 'tree-actions';
+
+                // Botão Renomear
+                const renameBtn = document.createElement('button');
+                renameBtn.className = 'btn-icon'; 
+                renameBtn.innerHTML = ICONS.edit; 
+                renameBtn.title = "Renomear";
+                renameBtn.onclick = (e) => { e.stopPropagation(); TreeManager.renameNode(node.id); };
+                actions.appendChild(renameBtn);
+
+                // Botão Adicionar Página (Apenas Pastas)
+                if (node.type === 'folder') {
+                    const addPageBtn = document.createElement('button');
+                    addPageBtn.className = 'btn-icon'; 
+                    addPageBtn.innerHTML = ICONS.addPage; 
+                    addPageBtn.title = "Nova página nesta pasta";
+                    addPageBtn.onclick = (e) => { e.stopPropagation(); TreeManager.createNode(node.id, 'page'); };
+                    actions.appendChild(addPageBtn);
+                }
+
+                // Botão Excluir
+                const delBtn = document.createElement('button');
+                delBtn.className = 'btn-icon btn-delete'; 
+                delBtn.innerHTML = ICONS.trash; 
+                delBtn.title = "Excluir";
+                delBtn.onclick = (e) => { e.stopPropagation(); TreeManager.deleteNode(node.id); };
+                actions.appendChild(delBtn);
+
+                row.append(icon, title, actions);
+                
+                row.onclick = () => {
+                    if (node.type === 'folder') {
+                        node.isOpen = !node.isOpen; 
+                        Database.saveTreeData(); 
+                        TreeManager.renderTree();
+                    } else { 
+                        EditorManager.loadPage(node.id, true); 
+                    }
+                };
+                wrapper.appendChild(row);
+
+                if (node.type === 'folder' && node.isOpen && node.children) {
+                    const childrenContainer = document.createElement('div');
+                    childrenContainer.className = 'children-container';
+                    node.children.forEach(child => childrenContainer.appendChild(TreeManager.buildTreeNode(child)));
+                    wrapper.appendChild(childrenContainer);
+                }
+                return wrapper;
+            },
+
+            // Navegação e Busca
+            findNode: (nodes, id) => {
+                for (let node of nodes) {
+                    if (node.id === id) return node;
+                    if (node.children) { 
+                        const found = TreeManager.findNode(node.children, id); 
+                        if (found) return found; 
+                    }
+                }
+                return null;
+            },
+
+            findFirstPage: (nodes) => {
+                for (let node of nodes) {
+                    if (node.type === 'page') return node;
+                    if (node.children) { 
+                        const found = TreeManager.findFirstPage(node.children); 
+                        if (found) return found; 
+                    }
+                }
+                return null;
+            },
+
+            filterTree: () => {
+                const term = DOM.searchBar.value.toLowerCase();
+                if (!term) { TreeManager.renderTree(AppState.treeData); return; }
+
+                const filterNode = (node, term) => {
+                    const matches = node.title && node.title.toLowerCase().includes(term);
+                    if (node.type === 'page') return matches ? { ...node } : null;
+                    if (node.type === 'folder') {
+                        const children = (node.children || []).map(child => filterNode(child, term)).filter(c => c !== null);
+                        if (matches || children.length > 0) return { ...node, isOpen: true, children: children };
+                    }
+                    return null;
+                };
+
+                const filteredData = AppState.treeData.map(node => filterNode(node, term)).filter(n => n !== null);
+                TreeManager.renderTree(filteredData);
+            },
+
+            // CRUD de Nós
+            createNode: (parentId, type) => {
+                const newNode = { id: AppUtils.generateId(), type: type, title: type === 'folder' ? 'Nova Pasta' : 'Nova Página' };
+                if (type === 'folder') { newNode.children = []; newNode.isOpen = true; }
+                
+                if (parentId === null) {
+                    AppState.treeData.push(newNode);
+                } else {
+                    const parent = TreeManager.findNode(AppState.treeData, parentId);
+                    if (parent && parent.type === 'folder') { 
+                        parent.isOpen = true; 
+                        parent.children.push(newNode); 
+                    }
+                }
+                
+                DOM.searchBar.value = ''; 
+                Database.saveTreeData();
+                if (type === 'page') EditorManager.loadPage(newNode.id, true); 
+                else TreeManager.renderTree();
+            },
+
+            deleteNode: (id) => {
+                if (!confirm('Deseja excluir este item permanentemente?')) return;
+                
+                const removeNodeFromList = (nodes, targetId) => {
+                    return nodes.filter(node => {
+                        if (node.id === targetId) return false;
+                        if (node.children) node.children = removeNodeFromList(node.children, targetId);
+                        return true;
+                    });
+                };
+
+                AppState.treeData = removeNodeFromList(AppState.treeData, id);
+                
+                if (id === AppState.activePageId || !TreeManager.findNode(AppState.treeData, AppState.activePageId)) {
+                    const firstPage = TreeManager.findFirstPage(AppState.treeData);
+                    if (firstPage) {
+                        EditorManager.loadPage(firstPage.id, true);
+                    } else { 
+                        DOM.titleEditor.value = ''; 
+                        DOM.contentEditor.innerHTML = ''; 
+                        AppState.activePageId = null; 
+                        EditorManager.updateWordCount(); 
+                    }
+                }
+                Database.saveTreeData(); 
+                TreeManager.renderTree();
+            },
+
+            renameNode: (id) => {
+                const node = TreeManager.findNode(AppState.treeData, id);
+                if (node) {
+                    const novoNome = prompt('Digite o novo nome:', node.title);
+                    if (novoNome && novoNome.trim() !== '') {
+                        node.title = novoNome.trim();
+                        if (id === AppState.activePageId) DOM.titleEditor.value = node.title;
+                        Database.saveTreeData(); 
+                        TreeManager.renderTree();
+                    }
+                }
+            },
+
+            // Drag and Drop Lógica
+            handleDragStart: (e, id) => {
+                AppState.draggedItemId = id;
+                e.dataTransfer.effectAllowed = 'move';
+                e.stopPropagation();
+            },
+
+            handleDrop: (e, targetId, targetType, element) => {
+                e.preventDefault();
+                e.stopPropagation();
+                element.querySelector('.tree-row').classList.remove('drag-over');
+                
+                if (!AppState.draggedItemId || AppState.draggedItemId === targetId) return;
+
+                if (TreeManager.isDescendant(AppState.draggedItemId, targetId)) {
+                    AppUtils.showToast("Inválido: não é possível mover uma pasta para dentro de si mesma.");
+                    return;
+                }
+
+                let draggedNode = TreeManager.extractAndRemoveNode(AppState.draggedItemId);
+                if (!draggedNode) return;
+
+                if (targetType === 'folder') {
+                    const targetFolder = TreeManager.findNode(AppState.treeData, targetId);
+                    if (targetFolder) {
+                        targetFolder.children = targetFolder.children || [];
+                        targetFolder.children.push(draggedNode);
+                        targetFolder.isOpen = true;
+                    }
+                } else {
+                    const parent = TreeManager.findParent(AppState.treeData, targetId);
+                    if (parent === null) { 
+                        AppState.treeData.push(draggedNode); 
+                    } else if (parent && parent.children) { 
+                        parent.children.push(draggedNode); 
+                    }
+                }
+
+                AppState.draggedItemId = null;
+                Database.saveTreeData(); 
+                TreeManager.renderTree(); 
+                DOM.searchBar.value = ''; 
+            },
+
+            handleRootDrop: (e) => {
+                e.preventDefault();
+                if (!AppState.draggedItemId) return;
+                let draggedNode = TreeManager.extractAndRemoveNode(AppState.draggedItemId);
+                if (draggedNode) { 
+                    AppState.treeData.push(draggedNode); 
+                    Database.saveTreeData(); 
+                    TreeManager.renderTree(); 
+                }
+                AppState.draggedItemId = null;
+            },
+
+            extractAndRemoveNode: (idProcurado) => {
+                let nodeEncontrado = null;
+                const extract = (nodes) => {
+                    for (let i = 0; i < nodes.length; i++) {
+                        if (nodes[i].id === idProcurado) {
+                            nodeEncontrado = nodes.splice(i, 1)[0];
+                            return true;
+                        }
+                        if (nodes[i].children && extract(nodes[i].children)) return true;
+                    }
+                    return false;
+                };
+                extract(AppState.treeData);
+                return nodeEncontrado;
+            },
+
+            findParent: (nodes, childId, parent = null) => {
+                for (let node of nodes) {
+                    if (node.id === childId) return parent;
+                    if (node.children) {
+                        const found = TreeManager.findParent(node.children, childId, node);
+                        if (found !== undefined) return found; 
+                    }
+                }
+                return undefined;
+            },
+
+            isDescendant: (parentId, childId) => {
+                if (parentId === childId) return true;
+                const parentNode = TreeManager.findNode(AppState.treeData, parentId);
+                if (!parentNode || parentNode.type !== 'folder' || !parentNode.children) return false;
+                const check = (nodes) => {
+                    for(let n of nodes) {
+                        if (n.id === childId) return true;
+                        if (n.children && check(n.children)) return true;
+                    }
+                    return false;
+                };
+                return check(parentNode.children);
             }
-            return null;
-        }
+        };
 
-        function generateId() { return '_' + Math.random().toString(36).substr(2, 9); }
+        /**
+         * Lógica do Editor de Texto e Imagens
+         */
+        const EditorManager = {
+            async loadPage(id, animate = true) {
+                const pageNode = TreeManager.findNode(AppState.treeData, id);
+                if (!pageNode || pageNode.type !== 'page') return;
 
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message; toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
+                AppState.activePageId = id;
+                DOM.titleEditor.value = pageNode.title;
+                DOM.contentEditor.innerHTML = "Carregando...";
+                
+                const content = await Database.getPageContent(id);
+                DOM.contentEditor.innerHTML = content;
+                TreeManager.renderTree(); // Atualiza a seleção visual
+                
+                if (animate) {
+                    DOM.contentEditor.classList.remove('page-turn-anim');
+                    DOM.titleEditor.classList.remove('page-turn-anim');
+                    void DOM.contentEditor.offsetWidth; // Trigger reflow
+                    DOM.contentEditor.classList.add('page-turn-anim');
+                    DOM.titleEditor.classList.add('page-turn-anim');
+                }
+                EditorManager.updateWordCount();
+            },
 
-        function updateWordCount() {
-            if(!activePageId) return;
-            const text = contentEditor.innerText || "";
-            const charCount = text.replace(/\s/g, '').length;
-            const words = text.trim().split(/\s+/);
-            const wordCount = text.trim() === "" ? 0 : words.length;
-            wordCountEl.textContent = `${wordCount} palavras | ${charCount} caracteres`;
-        }
+            saveCurrentPage: () => {
+                if (!AppState.activePageId) return;
+                
+                const pageNode = TreeManager.findNode(AppState.treeData, AppState.activePageId);
+                if (pageNode) {
+                    pageNode.title = DOM.titleEditor.value;
+                    const activeEl = document.querySelector('.tree-row.active .tree-title');
+                    if (activeEl) activeEl.textContent = pageNode.title;
+                    
+                    Database.saveTreeData();
+                    Database.savePageContent(AppState.activePageId, DOM.contentEditor.innerHTML);
+                }
+            },
 
-        // ==== EDITOR RICO ====
-        function formatText(command, value = null) {
-            document.execCommand(command, false, value);
-            contentEditor.focus(); saveCurrentPage();
-        }
+            updateWordCount: () => {
+                if (!AppState.activePageId) return;
+                const text = DOM.contentEditor.innerText || "";
+                const charCount = text.replace(/\s/g, '').length;
+                const words = text.trim().split(/\s+/);
+                const wordCount = text.trim() === "" ? 0 : words.length;
+                DOM.wordCount.textContent = `${wordCount} palavras | ${charCount} caracteres`;
+            },
 
-        // ==== COMPRESSÃO E INSERÇÃO DE IMAGENS ====
-        function handleImage(file) {
-            if (!file.type.startsWith('image/')) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.execCommand('insertImage', false, e.target.result);
-                saveCurrentPage();
+            formatText: (command, value = null) => {
+                document.execCommand(command, false, value);
+                DOM.contentEditor.focus(); 
+                EditorManager.saveCurrentPage();
+            },
+
+            /**
+             * Comprime a imagem colada/arrastada antes de transformá-la em Base64
+             * Isso é vital para não exceder o limite de 1MB do documento no Firestore.
+             */
+            handleImageUpload: (file) => {
+                if (!file.type.startsWith('image/')) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        // Limites máximos para compressão
+                        const MAX_WIDTH = 1200;
+                        const MAX_HEIGHT = 1200;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height && width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        } else if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Comprime para JPEG com 80% de qualidade (previne documentos gigantes no db)
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                        document.execCommand('insertImage', false, compressedBase64);
+                        EditorManager.saveCurrentPage();
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            },
+
+            initImageResizer: () => {
+                DOM.contentEditor.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'IMG') {
+                        AppState.currentResizingImg = e.target;
+                        EditorManager.updateResizerPosition();
+                    } else {
+                        AppState.currentResizingImg = null;
+                        DOM.imgResizer.style.display = 'none';
+                    }
+                });
+
+                DOM.contentEditor.addEventListener('scroll', () => { if (AppState.currentResizingImg) EditorManager.updateResizerPosition(); });
+                window.addEventListener('resize', () => { if (AppState.currentResizingImg) EditorManager.updateResizerPosition(); });
+
+                DOM.resizerHandle.addEventListener('mousedown', EditorManager.startResize);
+                DOM.resizerHandle.addEventListener('touchstart', EditorManager.startResize, {passive: false});
+            },
+
+            updateResizerPosition: () => {
+                if (!AppState.currentResizingImg) {
+                    DOM.imgResizer.style.display = 'none';
+                    return;
+                }
+                
+                const contentRect = DOM.contentEditor.getBoundingClientRect();
+                const imgRect = AppState.currentResizingImg.getBoundingClientRect();
+                
+                if (imgRect.bottom < contentRect.top || imgRect.top > contentRect.bottom) {
+                     DOM.imgResizer.style.display = 'none';
+                     return;
+                }
+
+                const wrapperRect = DOM.editorWrapper.getBoundingClientRect();
+                DOM.imgResizer.style.display = 'block';
+                DOM.imgResizer.style.top = (imgRect.top - wrapperRect.top) + 'px';
+                DOM.imgResizer.style.left = (imgRect.left - wrapperRect.left) + 'px';
+                DOM.imgResizer.style.width = imgRect.width + 'px';
+                DOM.imgResizer.style.height = imgRect.height + 'px';
+            },
+
+            startResize: (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                AppState.isResizing = true;
+                
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                AppState.imgStartX = clientX;
+                AppState.imgStartW = AppState.currentResizingImg.offsetWidth;
+                AppState.imgStartH = AppState.currentResizingImg.offsetHeight;
+                
+                document.addEventListener('mousemove', EditorManager.resizeImg);
+                document.addEventListener('mouseup', EditorManager.stopResizeImg);
+                document.addEventListener('touchmove', EditorManager.resizeImg, {passive: false});
+                document.addEventListener('touchend', EditorManager.stopResizeImg);
+            },
+
+            resizeImg: (e) => {
+                if (!AppState.isResizing || !AppState.currentResizingImg) return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const dx = clientX - AppState.imgStartX;
+                const newW = AppState.imgStartW + dx;
+                
+                if (newW > 40) { 
+                    AppState.currentResizingImg.style.width = newW + 'px';
+                    AppState.currentResizingImg.style.height = 'auto'; 
+                    EditorManager.updateResizerPosition();
+                }
+            },
+
+            stopResizeImg: () => {
+                AppState.isResizing = false;
+                document.removeEventListener('mousemove', EditorManager.resizeImg);
+                document.removeEventListener('mouseup', EditorManager.stopResizeImg);
+                document.removeEventListener('touchmove', EditorManager.resizeImg);
+                document.removeEventListener('touchend', EditorManager.stopResizeImg);
+                EditorManager.saveCurrentPage();
             }
-            reader.readAsDataURL(file);
-        }
+        };
 
-        contentEditor.addEventListener('paste', (e) => {
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let item of items) {
-                if (item.type.indexOf('image') === 0) { e.preventDefault(); handleImage(item.getAsFile()); }
+        /**
+         * Inicialização do Aplicativo
+         */
+        const App = {
+            async init() {
+                await Database.loadData();
+                
+                const firstPage = TreeManager.findFirstPage(AppState.treeData);
+                if (firstPage) AppState.activePageId = firstPage.id;
+
+                TreeManager.renderTree();
+                if (AppState.activePageId) EditorManager.loadPage(AppState.activePageId, false);
+                
+                EditorManager.initImageResizer();
+                this.setupDragAndDropTextEditor();
+            },
+
+            setupDragAndDropTextEditor() {
+                DOM.contentEditor.addEventListener('paste', (e) => {
+                    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                    for (let item of items) {
+                        if (item.type.indexOf('image') === 0) { 
+                            e.preventDefault(); 
+                            EditorManager.handleImageUpload(item.getAsFile()); 
+                        }
+                    }
+                });
+
+                DOM.contentEditor.addEventListener('dragover', (e) => e.preventDefault());
+                DOM.contentEditor.addEventListener('drop', (e) => {
+                    if(e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        e.preventDefault(); 
+                        EditorManager.handleImageUpload(e.dataTransfer.files[0]);
+                    }
+                });
             }
-        });
+        };
 
-        contentEditor.addEventListener('dragover', (e) => e.preventDefault());
-        contentEditor.addEventListener('drop', (e) => {
-            if(e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                e.preventDefault(); handleImage(e.dataTransfer.files[0]);
-            }
-        });
+        // Inicia a aplicação
+        App.init();
 
-        // Inicia tudo
-        init();
     </script>
 </body>
 </html>
+```eof
