@@ -359,42 +359,30 @@
 
         // ==========================================
         //  CONFIGURAÇÃO DO FIREBASE
-        //  ⚠️ SUBSTITUA PELAS SUAS CHAVES DO CONSOLE!
         // ==========================================
-const firebaseConfig = {
-
-  apiKey: "AIzaSyC--u_aq4ShfIGMD-cOS2rBOXCdzKEXhAE",
-
-  authDomain: "enciclopedia-a0293.firebaseapp.com",
-
-  projectId: "enciclopedia-a0293",
-
-  storageBucket: "enciclopedia-a0293.firebasestorage.app",
-
-  messagingSenderId: "47473080126",
-
-  appId: "1:47473080126:web:62bb18abb644cd6d971e6f",
-
-  measurementId: "G-608GJTQPEE"
-
-};
-
+        const firebaseConfig = {
+          apiKey: "AIzaSyC--u_aq4ShfIGMD-cOS2rBOXCdzKEXhAE",
+          authDomain: "enciclopedia-a0293.firebaseapp.com",
+          projectId: "enciclopedia-a0293",
+          storageBucket: "enciclopedia-a0293.firebasestorage.app",
+          messagingSenderId: "47473080126",
+          appId: "1:47473080126:web:62bb18abb644cd6d971e6f",
+          measurementId: "G-608GJTQPEE"
+        };
         
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
-        // Referência para salvar/ler o caderno inteiro num documento
         const cadernoRef = db.collection("enciclopedia").doc("meuCadernoUnico");
+        const paginasCollection = db.collection("paginas");
         
-        let saveTimeout = null; // Variável para controlar o delay de salvar na nuvem
-        // ==========================================
+        let saveTimeout = null;
 
         const treeContainer = document.getElementById('tree-container');
         const titleEditor = document.getElementById('title-editor');
         const contentEditor = document.getElementById('content-editor');
         const wordCountEl = document.getElementById('word-count');
         const searchBar = document.getElementById('search-bar');
-		const paginasCollection = db.collection("paginas");
 
         // ==== VARIÁVEIS RESIZER (IMAGEM) ====
         const imgResizer = document.getElementById('img-resizer');
@@ -409,16 +397,13 @@ const firebaseConfig = {
             document.getElementById('save-status').textContent = 'Carregando da nuvem...';
             
             try {
-                // Tenta buscar do Firebase
                 const docSnap = await cadernoRef.get();
                 
                 if (docSnap.exists) {
                     treeData = docSnap.data().treeData;
                 } else {
-                    // Se não existe na nuvem, checa o localStorage antigo ou cria default
                     const savedLocal = localStorage.getItem('meuCadernoPremium');
                     treeData = savedLocal ? JSON.parse(savedLocal) : createDefaultData();
-                    // Já salva essa estrutura inicial na nuvem
                     saveData();
                 }
             } catch (error) {
@@ -439,7 +424,7 @@ const firebaseConfig = {
         function createDefaultData() {
             return [{
                 id: generateId(), type: 'folder', title: 'Meu Diário', isOpen: true,
-                children: [ { id: generateId(), type: 'page', title: 'Primeira Página', content: '<div>Escreva seus pensamentos aqui...</div>' } ]
+                children: [ { id: generateId(), type: 'page', title: 'Primeira Página' } ]
             }];
         }
 
@@ -453,7 +438,6 @@ const firebaseConfig = {
             const wrapper = document.createElement('div');
             wrapper.className = 'tree-item';
             
-            // Atributos de Drag & Drop
             wrapper.draggable = true;
             wrapper.addEventListener('dragstart', (e) => handleDragStart(e, node.id));
             wrapper.addEventListener('dragover', (e) => handleDragOver(e, wrapper, node.type));
@@ -474,7 +458,6 @@ const firebaseConfig = {
             const actions = document.createElement('div');
             actions.className = 'tree-actions';
 
-            // Botão de Renomear
             const renameBtn = document.createElement('button');
             renameBtn.className = 'btn-icon'; 
             renameBtn.innerHTML = ICONS.edit; 
@@ -631,7 +614,7 @@ const firebaseConfig = {
         // ==== CRUD DE NÓS ====
         function createNode(parentId, type) {
             const newNode = { id: generateId(), type: type, title: type === 'folder' ? 'Nova Pasta' : 'Nova Página' };
-            if(type === 'folder') { newNode.children = []; newNode.isOpen = true; } else { newNode.content = ''; }
+            if(type === 'folder') { newNode.children = []; newNode.isOpen = true; }
 
             if (parentId === null) treeData.push(newNode);
             else {
@@ -689,7 +672,6 @@ const firebaseConfig = {
             const contentRect = contentEditor.getBoundingClientRect();
             const imgRect = currentResizingImg.getBoundingClientRect();
             
-            // Oculta se rolar para fora da tela
             if (imgRect.bottom < contentRect.top || imgRect.top > contentRect.bottom) {
                  imgResizer.style.display = 'none';
                  return;
@@ -747,66 +729,64 @@ const firebaseConfig = {
         }
 
         // ==== CONTROLE DE PÁGINA ====
-async function loadPage(id, animate = true) {
-    const pageNode = findNode(treeData, id);
-    if (!pageNode || pageNode.type !== 'page') return;
+        async function loadPage(id, animate = true) {
+            const pageNode = findNode(treeData, id);
+            if (!pageNode || pageNode.type !== 'page') return;
 
-    activePageId = id;
-    titleEditor.value = pageNode.title;
-    
-    // Mostra status de carregamento
-    contentEditor.innerHTML = "Carregando...";
+            activePageId = id;
+            titleEditor.value = pageNode.title;
+            contentEditor.innerHTML = "Carregando...";
 
-    try {
-        // Busca o conteúdo real no Firestore na coleção separada
-        const doc = await paginasCollection.doc(id).get();
-        if (doc.exists) {
-            contentEditor.innerHTML = doc.data().content;
-        } else {
-            contentEditor.innerHTML = "<div>Comece a escrever aqui...</div>";
-        }
-    } catch (e) {
-        contentEditor.innerHTML = "Erro ao carregar conteúdo.";
-    }
-                
-                if (animate) {
-                    contentEditor.classList.remove('page-turn-anim');
-                    titleEditor.classList.remove('page-turn-anim');
-                    void contentEditor.offsetWidth;
-                    contentEditor.classList.add('page-turn-anim');
-                    titleEditor.classList.add('page-turn-anim');
+            try {
+                const doc = await paginasCollection.doc(id).get();
+                if (doc.exists) {
+                    contentEditor.innerHTML = doc.data().content || "";
+                } else {
+                    contentEditor.innerHTML = "<div>Comece a escrever aqui...</div>";
                 }
+            } catch (e) {
+                contentEditor.innerHTML = "Erro ao carregar conteúdo.";
+            }
+
+            renderTree();
+            updateWordCount();
+                
+            if (animate) {
+                contentEditor.classList.remove('page-turn-anim');
+                titleEditor.classList.remove('page-turn-anim');
+                void contentEditor.offsetWidth;
+                contentEditor.classList.add('page-turn-anim');
+                titleEditor.classList.add('page-turn-anim');
+            }
         }
 
-function saveCurrentPage() {
-    if (!activePageId) return;
-    
-    const pageNode = findNode(treeData, activePageId);
-    if (pageNode) {
-        pageNode.title = titleEditor.value;
-        const activeEl = document.querySelector('.tree-row.active .tree-title');
-        if(activeEl) activeEl.textContent = pageNode.title;
-        
-        // Salva a estrutura da árvore (agora leve, sem o conteúdo)
-        saveData(); 
-        
-        // Salva o conteúdo separadamente na coleção de páginas
-        paginasCollection.doc(activePageId).set({
-            content: contentEditor.innerHTML
-        }, { merge: true });
-    }
-}
+        function saveCurrentPage() {
+            if (!activePageId) return;
+            
+            const pageNode = findNode(treeData, activePageId);
+            if (pageNode) {
+                pageNode.title = titleEditor.value;
+                const activeEl = document.querySelector('.tree-row.active .tree-title');
+                if(activeEl) activeEl.textContent = pageNode.title;
+                
+                saveData(); 
+                
+                paginasCollection.doc(activePageId).set({
+                    content: contentEditor.innerHTML
+                }, { merge: true });
 
-        // ==== SALVAR DADOS (FIREBASE E LOCALSTORAGE COM DEBOUNCE) ====
-function saveData() {
-    // Apenas salva a estrutura (IDs e títulos), nunca o conteúdo enorme
-    // Isso garante que você NUNCA atingirá o limite de 1MB do Firestore
-    clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(() => {
-        cadernoRef.set({ treeData: treeData });
-        document.getElementById('save-status').textContent = 'Sincronizado ✔️';
-    }, 1000);
-}
+                updateWordCount();
+            }
+        }
+
+        // ==== SALVAR DADOS (FIREBASE COM DEBOUNCE) ====
+        function saveData() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                cadernoRef.set({ treeData: treeData });
+                document.getElementById('save-status').textContent = 'Sincronizado ✔️';
+            }, 1000);
+        }
 
         // ==== SISTEMA DE BACKUP ====
         function exportBackup() {
@@ -885,16 +865,15 @@ function saveData() {
         }
 
         // ==== COMPRESSÃO E INSERÇÃO DE IMAGENS ====
-function handleImage(file) {
-    if (!file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        // Insere a imagem direto, mantendo o formato original (PNG transparente continua PNG)
-        document.execCommand('insertImage', false, e.target.result);
-        saveCurrentPage();
-    }
-    reader.readAsDataURL(file);
-}
+        function handleImage(file) {
+            if (!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.execCommand('insertImage', false, e.target.result);
+                saveCurrentPage();
+            }
+            reader.readAsDataURL(file);
+        }
 
         contentEditor.addEventListener('paste', (e) => {
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
