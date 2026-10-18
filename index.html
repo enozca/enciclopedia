@@ -724,50 +724,100 @@
         };
 
         /**
-         * Interações de Banco de Dados
+         * Interações de Banco de Dados com Resiliência e Cache Local
          */
         const Database = {
             async loadData() {
-                DOM.saveStatus.textContent = 'Carregando da nuvem...';
+                DOM.saveStatus.textContent = 'Carregando dados...';
                 try {
                     const docSnap = await cadernoRef.get();
-                    if (docSnap.exists) {
+                    if (docSnap.exists && docSnap.data().treeData) {
                         AppState.treeData = docSnap.data().treeData;
+                        // Salva backup local preventivo de contingência
+                        localStorage.setItem('enciclopedia_tree_cache', JSON.stringify(AppState.treeData));
                     } else {
-                        AppState.treeData = TreeManager.createDefaultData();
-                        this.saveTreeData();
+                        // Tenta recuperar do localStorage se a nuvem estiver vazia
+                        const localCache = localStorage.getItem('enciclopedia_tree_cache');
+                        if (localCache) {
+                            AppState.treeData = JSON.parse(localCache);
+                            AppUtils.showToast("Carregado do cache local de segurança.");
+                        } else {
+                            AppState.treeData = TreeManager.createDefaultData();
+                            this.saveTreeData();
+                        }
                     }
                 } catch (error) {
-                    console.warn("Aviso: Falha ao carregar do Firebase. Carregando dados padrão.", error);
+                    console.warn("Aviso: Falha ao carregar do Firebase. Tentando cache local...", error);
+                    const localCache = localStorage.getItem('enciclopedia_tree_cache');
+                    if (localCache) {
+                        try {
+                            AppState.treeData = JSON.parse(localCache);
+                            DOM.saveStatus.textContent = 'Modo Offline (Cache Local) ⚠️';
+                            AppUtils.showToast("Conexão falhou. Usando backup local!");
+                            return;
+                        } catch (e) {
+                            console.error("Cache local corrompido", e);
+                        }
+                    }
                     AppState.treeData = TreeManager.createDefaultData();
+                    DOM.saveStatus.textContent = 'Erro de conexão ❌';
                 }
-                DOM.saveStatus.textContent = 'Nuvem sincronizada ✔️';
+                DOM.saveStatus.textContent = 'Sincronizado ✔️';
             },
 
             saveTreeData() {
+                // Salva imediatamente no Cache Local para segurança instantânea contra dessincronização
+                localStorage.setItem('enciclopedia_tree_cache', JSON.stringify(AppState.treeData));
+
                 clearTimeout(AppState.saveTimeout);
                 AppState.saveTimeout = setTimeout(() => {
-                    cadernoRef.set({ treeData: AppState.treeData })
-                        .then(() => DOM.saveStatus.textContent = 'Sincronizado ✔️')
-                        .catch(() => DOM.saveStatus.textContent = 'Erro ao sincronizar ❌');
+                    Database._executeCloudSave(AppState.treeData, 3);
                 }, 1000);
+            },
+
+            _executeCloudSave(data, retries) {
+                cadernoRef.set({ treeData: data })
+                    .then(() => {
+                        DOM.saveStatus.textContent = 'Sincronizado ✔️';
+                    })
+                    .catch((error) => {
+                        console.warn(`Tentativa de salvamento falhou. Tentativas restantes: ${retries}`, error);
+                        if (retries > 0) {
+                            setTimeout(() => Database._executeCloudSave(data, retries - 1), 2000);
+                        } else {
+                            DOM.saveStatus.textContent = 'Erro ao sincronizar nuvem ❌';
+                            AppUtils.showToast("Aviso: Dados salvos apenas localmente. Verifique sua internet!");
+                        }
+                    });
             },
 
             async getPageContent(id) {
                 try {
                     const doc = await paginasCollection.doc(id).get();
-                    return doc.exists ? doc.data().content : "<div>Comece a escrever aqui...</div>";
+                    if (doc.exists && doc.data().content) {
+                        const content = doc.data().content;
+                        localStorage.setItem(`page_cache_${id}`, content);
+                        return content;
+                    }
                 } catch (e) {
-                    console.error("Erro ao carregar o conteúdo da página:", e);
-                    return "Erro ao carregar conteúdo.";
+                    console.warn("Erro ao carregar página da nuvem, buscando cache local...", e);
                 }
+
+                // Fallback para o cache local da página específica
+                const localPage = localStorage.getItem(`page_cache_${id}`);
+                if (localPage) return localPage;
+
+                return "<div>Comece a escrever aqui...</div>";
             },
 
             async savePageContent(id, content) {
+                // Salva no cache local imediatamente
+                localStorage.setItem(`page_cache_${id}`, content);
+
                 try {
                     await paginasCollection.doc(id).set({ content }, { merge: true });
                 } catch (e) {
-                    console.error("Erro ao salvar o conteúdo da página:", e);
+                    console.error("Erro ao salvar o conteúdo da página na nuvem:", e);
                 }
             }
         };
@@ -1126,7 +1176,6 @@
                 reader.onload = (e) => {
                     const img = new Image();
                     img.onload = () => {
-                        // Limites máximos para compressão
                         const MAX_WIDTH = 1200;
                         const MAX_HEIGHT = 1200;
                         let width = img.width;
@@ -1146,7 +1195,6 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // Comprime para JPEG com 80% de qualidade (previne documentos gigantes no db)
                         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
                         document.execCommand('insertImage', false, compressedBase64);
                         EditorManager.saveCurrentPage();
