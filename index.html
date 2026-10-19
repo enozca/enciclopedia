@@ -796,13 +796,16 @@
 
         const Database = {
             async loadData() {
-                DOM.saveStatus.textContent = 'Carregando dados...';
+                DOM.saveStatus.textContent = 'Carregando da nuvem...';
                 try {
+                    // 1. Tenta carregar a árvore principal direto do Firebase primeiro
                     const docSnap = await cadernoRef.get();
                     if (docSnap.exists && docSnap.data().treeData) {
                         AppState.treeData = docSnap.data().treeData;
+                        // Atualiza o cache local com a verdade da nuvem
                         localStorage.setItem('enciclopedia_tree_cache', JSON.stringify(AppState.treeData));
                     } else {
+                        // Se não tem na nuvem, aí sim olha o cache local
                         const localCache = localStorage.getItem('enciclopedia_tree_cache');
                         if (localCache) {
                             AppState.treeData = JSON.parse(localCache);
@@ -812,6 +815,7 @@
                         }
                     }
                 } catch (error) {
+                    console.error("Erro ao carregar do Firebase:", error);
                     const localCache = localStorage.getItem('enciclopedia_tree_cache');
                     if (localCache) {
                         AppState.treeData = JSON.parse(localCache);
@@ -824,35 +828,43 @@
                 DOM.saveStatus.textContent = 'Sincronizado ✔️';
             },
 
-            saveTreeData() {
-                localStorage.setItem('enciclopedia_tree_cache', JSON.stringify(AppState.treeData));
-                clearTimeout(AppState.saveTimeout);
-                AppState.saveTimeout = setTimeout(() => {
-                    cadernoRef.set({ treeData: AppState.treeData })
-                        .then(() => DOM.saveStatus.textContent = 'Sincronizado ✔️')
-                        .catch(() => DOM.saveStatus.textContent = 'Erro de sincronização ❌');
-                }, 1000);
-            },
-
             async getPageContent(id) {
+                // TRAVA DE SEGURANÇA: Sempre tenta buscar o conteúdo real direto do Firestore primeiro
                 try {
                     const doc = await paginasCollection.doc(id).get();
-                    if (doc.exists && doc.data().content) {
+                    if (doc.exists && doc.data().content !== undefined) {
                         const content = doc.data().content;
+                        // Atualiza o cache local com o conteúdo fresco do Firebase
                         localStorage.setItem(`page_cache_${id}`, content);
                         return content;
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.error("Erro ao buscar página do Firebase:", e);
+                }
 
-                return localStorage.getItem(`page_cache_${id}`) || "<div>Start writing...</div>";
+                // Se falhar a rede, recorre ao cache local como plano B
+                return localStorage.getItem(`page_cache_${id}`) || "<div>Comece a escrever aqui...</div>";
             },
 
             async savePageContent(id, content) {
+                // TRAVA CONTRA CONTEÚDO VAZIO ACIDENTAL: 
+                // Se por algum bug o editor tentar salvar um conteúdo vazio por cima de algo importante, bloqueamos.
+                if (!content || content.trim() === "" || content === "<div><br></div>") {
+                    console.warn("Tentativa de salvar conteúdo vazio bloqueada para evitar perda de dados.");
+                    return;
+                }
+
                 localStorage.setItem(`page_cache_${id}`, content);
                 HistoryManager.saveSnapshot(id, content);
+                DOM.saveStatus.textContent = 'Salvando página... ⏳';
+                
                 try {
                     await paginasCollection.doc(id).set({ content }, { merge: true });
-                } catch (e) {}
+                    DOM.saveStatus.textContent = 'Sincronizado ✔️';
+                } catch (e) {
+                    console.error("Erro ao salvar conteúdo da página:", e);
+                    DOM.saveStatus.textContent = 'Erro ao sincronizar página ❌';
+                }
             }
         };
 
@@ -1425,13 +1437,18 @@
 
         const App = {
             async init() {
+                // 1. Carrega todos os dados do Firebase antes de mexer na tela
                 await Database.loadData();
                 
                 const firstPage = TreeManager.findFirstPage(AppState.treeData);
                 if (firstPage) AppState.activePageId = firstPage.id;
 
                 TreeManager.renderTree();
-                if (AppState.activePageId) EditorManager.loadPage(AppState.activePageId, false);
+                
+                // 2. Carrega o conteúdo da página ativa de forma assíncrona da nuvem
+                if (AppState.activePageId) {
+                    await EditorManager.loadPage(AppState.activePageId, false);
+                }
                 
                 EditorManager.initImageResizer();
                 this.setupDragAndDropTextEditor();
