@@ -80,6 +80,7 @@
             box-shadow: inset 0 0 30px rgba(180, 160, 130, 0.2);
             position: relative;
             background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+            overflow: hidden;
         }
 
         /* ==========================================================================
@@ -93,6 +94,7 @@
             flex-direction: column;
             padding: 25px 15px 15px 25px;
             position: relative;
+            transition: transform 0.3s ease;
         }
 
         .sidebar-header {
@@ -306,13 +308,13 @@
             border-bottom: 1px solid #d4c4a8;
             border-radius: 0 15px 0 0;
             display: flex;
-            gap: 8px;
+            gap: 6px;
             align-items: center;
             flex-wrap: wrap;
             z-index: 10;
         }
 
-        .toolbar select, .toolbar button, .toolbar input[type="color"] {
+        .toolbar select, .toolbar button, .toolbar input[type="color"], .toolbar input[type="number"] {
             height: 32px;
             border: 1px solid #c2b59b;
             background: #fff;
@@ -340,7 +342,7 @@
             stroke-linejoin: round;
         }
         
-        .toolbar button:hover, .toolbar select:hover {
+        .toolbar button:hover, .toolbar select:hover, .toolbar input:hover {
             background: #f0e7d5;
             transform: translateY(-1px);
         }
@@ -349,7 +351,35 @@
             width: 1px;
             height: 24px;
             background-color: #c2b59b;
-            margin: 0 4px;
+            margin: 0 2px;
+        }
+
+        /* PAINEL DE METADADOS E TAGS */
+        .metadata-panel {
+            background: rgba(240, 231, 213, 0.7);
+            border-bottom: 1px solid #d4c4a8;
+            padding: 8px 40px 8px 80px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            color: #4a2e1b;
+            z-index: 5;
+        }
+
+        .metadata-panel input {
+            flex-grow: 1;
+            padding: 4px 8px;
+            border: 1px solid #c2b59b;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.7);
+            font-family: inherit;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .metadata-panel span {
+            font-weight: bold;
         }
 
         .editor-wrapper {
@@ -408,6 +438,17 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             margin-top: 8px;
             display: inline-block;
+        }
+
+        /* Estilo para links internos */
+        .internal-link {
+            color: #7c4dff;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .internal-link:hover {
+            color: #512da8;
         }
 
         /* ==========================================================================
@@ -499,21 +540,65 @@
             transform: translateX(-50%) translateY(0);
             opacity: 1;
         }
+
+        /* Barra de Abas Mobile (Oculta no Desktop) */
+        .mobile-tab-bar {
+            display: none;
+            background: #4a2e1b;
+            color: #fff;
+            padding: 10px;
+            justify-content: space-around;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .mobile-tab-bar button {
+            background: transparent;
+            border: none;
+            color: #f0e7d5;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px 15px;
+            border-radius: 4px;
+        }
+        .mobile-tab-bar button.active {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
 		
         /* ==========================================================================
            RESPONSIVIDADE (MOBILE)
            ========================================================================== */
 		@media (max-width: 768px) {
-            body { height: auto; overflow-y: auto; display: block; }
-            .book-cover { width: 100vw; height: auto; min-height: 100vh; border-radius: 0; box-shadow: none; }
-            .book { flex-direction: column; height: auto; border-radius: 0; }
-            .left-page { width: 100%; height: auto; border-radius: 0; }
+            body { height: 100vh; overflow: hidden; display: block; }
+            .book-cover { width: 100vw; height: 100vh; max-width: none; border-radius: 0; box-shadow: none; }
+            .book { flex-direction: column; height: calc(100% - 44px); border-radius: 0; }
+            
+            .mobile-tab-bar { display: flex; }
+            
+            .left-page {
+                position: absolute;
+                top: 0; left: 0; width: 100%; height: 100%;
+                z-index: 20;
+                border-radius: 0;
+                display: none;
+            }
+            .left-page.mobile-visible { display: flex; }
+
+            .right-page {
+                position: absolute;
+                top: 0; left: 0; width: 100%; height: 100%;
+                z-index: 15;
+                display: none;
+            }
+            .right-page.mobile-visible { display: flex; }
+
             .binding { display: none; }
-            .right-page { width: 100%; height: auto; }
-            .toolbar { flex-wrap: wrap; justify-content: center; }
-            #content-editor { padding: 20px; }
-            .editor-wrapper::before { left: 20px; }
-            #title-editor { margin: 20px; }
+            .toolbar { flex-wrap: wrap; justify-content: flex-start; padding: 6px 10px; }
+            .metadata-panel { padding: 6px 15px; }
+            #content-editor { padding: 15px; }
+            #title-editor { margin: 15px; font-size: 26px; }
         }
     </style>
 </head>
@@ -521,9 +606,15 @@
 
     <div class="book-cover">
         <div class="book">
+            <!-- Abas Mobile para Alternar Índice/Editor -->
+            <div class="mobile-tab-bar" style="position: absolute; top: 0; left: 0; width: 100%; z-index: 30;">
+                <button id="tab-btn-index" onclick="MobileManager.switchTab('index')" class="active">📚 Índice</button>
+                <button id="tab-btn-editor" onclick="MobileManager.switchTab('editor')">✍️ Editor</button>
+            </div>
+
             <!-- ================= LATERAL ESQUERDA ================= -->
-            <aside class="left-page" ondragover="event.preventDefault()" ondrop="TreeManager.handleRootDrop(event)">
-                <h2 class="sidebar-header">a Enciclopédia.</h2>
+            <aside class="left-page mobile-visible" id="left-page-container" ondragover="event.preventDefault()" ondrop="TreeManager.handleRootDrop(event)">
+                <h2 class="sidebar-header" style="margin-top: 25px;">a Enciclopédia.</h2>
                 
                 <input type="text" id="search-bar" class="search-bar" placeholder="Buscar página..." oninput="TreeManager.filterTree()">
 
@@ -557,20 +648,21 @@
             <div class="binding"></div>
 
             <!-- ================= LATERAL DIREITA (EDITOR) ================= -->
-            <main class="right-page">
-                <div class="toolbar" id="toolbar">
+            <main class="right-page" id="right-page-container">
+                <div class="toolbar" id="toolbar" style="margin-top: 35px;">
                     <select onchange="EditorManager.formatText('fontName', this.value)" title="Estilo de Fonte">
                         <option value="'Lora', serif">Lora (Clássica)</option>
                         <option value="'Crimson Pro', serif">Crimson (Livro)</option>
                         <option value="'Dancing Script', cursive">Manuscrito</option>
                         <option value="Arial, sans-serif">Arial</option>
                     </select>
-                    <select onchange="EditorManager.formatText('fontSize', this.value)" title="Tamanho">
-                        <option value="3">Normal</option>
-                        <option value="4">Grande</option>
-                        <option value="5">Subtítulo</option>
-                        <option value="6">Título</option>
-                    </select>
+
+                    <!-- Tamanho de Fonte Customizável em px -->
+                    <div style="display: flex; align-items: center; gap: 3px;" title="Tamanho de Fonte Personalizado (px)">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"></path></svg>
+                        <input type="number" id="font-size-px" value="18" min="8" max="72" style="width: 45px; text-align: center;" onchange="EditorManager.setCustomFontSize(this.value)">
+                        <span style="font-size: 11px;">px</span>
+                    </div>
                     
                     <div class="toolbar-divider"></div>
                     
@@ -579,7 +671,13 @@
                     <button onclick="EditorManager.formatText('underline')" title="Sublinhado (Ctrl+U)"><svg viewBox="0 0 24 24"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path><line x1="4" y1="21" x2="20" y2="21"></line></svg></button>
                     <button onclick="EditorManager.formatText('strikeThrough')" title="Riscado"><svg viewBox="0 0 24 24"><path d="M17.3 4.9c-2.3-.6-4.4-1-6.2-.9-2.7.2-5.3 1.1-7.1 2.9-1.3 1.3-2 3.1-2 5.1s.7 3.8 2 5.1c1.8 1.8 4.4 2.7 7.1 2.9 1.8.1 3.9-.3 6.2-.9"></path><line x1="3" y1="12" x2="21" y2="12"></line></svg></button>
                     
+                    <!-- Botão Remover Formatação -->
+                    <button onclick="EditorManager.formatText('removeFormat')" title="Remover Formatação"><svg viewBox="0 0 24 24"><path d="M20 20H7L3 16c-.4-.4-.4-1 0-1.4L13.6 4c.4-.4 1-.4 1.4 0l5 5c.4.4.4 1 0 1.4L12 18z"></path><line x1="6" y1="12" x2="18" y2="12"></line></svg></button>
+
                     <div class="toolbar-divider"></div>
+
+                    <!-- Botão Link Interno -->
+                    <button onclick="EditorManager.insertInternalLinkPrompt()" title="Inserir Link Interno"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></button>
 
                     <button onclick="EditorManager.formatText('insertUnorderedList')" title="Lista"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></button>
                     <button onclick="EditorManager.formatText('justifyLeft')" title="Alinhar Esquerda"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="15" y2="12"></line><line x1="3" y1="18" x2="18" y2="18"></line></svg></button>
@@ -590,6 +688,12 @@
 
                     <input type="color" onchange="EditorManager.formatText('foreColor', this.value)" title="Cor do Texto" value="#2c3e50">
                     <input type="color" onchange="EditorManager.formatText('hiliteColor', this.value)" title="Marca-texto (Cor de Fundo)" value="#ffff00">
+                </div>
+
+                <!-- Painel de Metadados e Tags -->
+                <div class="metadata-panel">
+                    <span>Tags:</span>
+                    <input type="text" id="page-tags-input" placeholder="Ex: lore, personagem, facção (separadas por vírgula)" oninput="EditorManager.saveMetadata()">
                 </div>
 
                 <div class="editor-wrapper" id="editor-wrapper">
@@ -643,7 +747,12 @@
             toast: document.getElementById('toast'),
             imgResizer: document.getElementById('img-resizer'),
             resizerHandle: document.getElementById('resizer-handle'),
-            editorWrapper: document.getElementById('editor-wrapper')
+            editorWrapper: document.getElementById('editor-wrapper'),
+            pageTagsInput: document.getElementById('page-tags-input'),
+            leftPage: document.getElementById('left-page-container'),
+            rightPage: document.getElementById('right-page-container'),
+            tabIndexBtn: document.getElementById('tab-btn-index'),
+            tabEditorBtn: document.getElementById('tab-btn-editor')
         };
 
         const AppState = {
@@ -656,6 +765,25 @@
             imgStartX: 0,
             imgStartW: 0,
             imgStartH: 0
+        };
+
+        /**
+         * Gerenciador Mobile UX
+         */
+        const MobileManager = {
+            switchTab: (tab) => {
+                if (tab === 'index') {
+                    DOM.leftPage.classList.add('mobile-visible');
+                    DOM.rightPage.classList.remove('mobile-visible');
+                    DOM.tabIndexBtn.classList.add('active');
+                    DOM.tabEditorBtn.classList.remove('active');
+                } else {
+                    DOM.leftPage.classList.remove('mobile-visible');
+                    DOM.rightPage.classList.add('mobile-visible');
+                    DOM.tabIndexBtn.classList.remove('active');
+                    DOM.tabEditorBtn.classList.add('active');
+                }
+            }
         };
 
         /**
@@ -719,7 +847,7 @@
                     }
                 };
                 reader.readAsText(file);
-                event.target.value = ''; // Reseta o input
+                event.target.value = '';
             }
         };
 
@@ -753,21 +881,27 @@
                 }, 1000);
             },
 
-            async getPageContent(id) {
+            async getPageData(id) {
                 try {
                     const doc = await paginasCollection.doc(id).get();
-                    return doc.exists ? doc.data().content : "<div>Comece a escrever aqui...</div>";
+                    if (doc.exists) {
+                        return {
+                            content: doc.data().content || "<div>Comece a escrever aqui...</div>",
+                            tags: doc.data().tags || ""
+                        };
+                    }
+                    return { content: "<div>Comece a escrever aqui...</div>", tags: "" };
                 } catch (e) {
-                    console.error("Erro ao carregar o conteúdo da página:", e);
-                    return "Erro ao carregar conteúdo.";
+                    console.error("Erro ao carregar a página:", e);
+                    return { content: "Erro ao carregar conteúdo.", tags: "" };
                 }
             },
 
-            async savePageContent(id, content) {
+            async savePageData(id, content, tags) {
                 try {
-                    await paginasCollection.doc(id).set({ content }, { merge: true });
+                    await paginasCollection.doc(id).set({ content, tags }, { merge: true });
                 } catch (e) {
-                    console.error("Erro ao salvar o conteúdo da página:", e);
+                    console.error("Erro ao salvar os dados da página:", e);
                 }
             }
         };
@@ -791,7 +925,6 @@
                 wrapper.className = 'tree-item';
                 wrapper.draggable = true;
                 
-                // Eventos de Drag & Drop
                 wrapper.addEventListener('dragstart', (e) => TreeManager.handleDragStart(e, node.id));
                 wrapper.addEventListener('dragover', (e) => { e.preventDefault(); wrapper.querySelector('.tree-row').classList.add('drag-over'); });
                 wrapper.addEventListener('dragleave', (e) => wrapper.querySelector('.tree-row').classList.remove('drag-over'));
@@ -811,7 +944,6 @@
                 const actions = document.createElement('div');
                 actions.className = 'tree-actions';
 
-                // Botão Renomear
                 const renameBtn = document.createElement('button');
                 renameBtn.className = 'btn-icon'; 
                 renameBtn.innerHTML = ICONS.edit; 
@@ -819,7 +951,6 @@
                 renameBtn.onclick = (e) => { e.stopPropagation(); TreeManager.renameNode(node.id); };
                 actions.appendChild(renameBtn);
 
-                // Botão Adicionar Página (Apenas Pastas)
                 if (node.type === 'folder') {
                     const addPageBtn = document.createElement('button');
                     addPageBtn.className = 'btn-icon'; 
@@ -829,7 +960,6 @@
                     actions.appendChild(addPageBtn);
                 }
 
-                // Botão Excluir
                 const delBtn = document.createElement('button');
                 delBtn.className = 'btn-icon btn-delete'; 
                 delBtn.innerHTML = ICONS.trash; 
@@ -846,6 +976,9 @@
                         TreeManager.renderTree();
                     } else { 
                         EditorManager.loadPage(node.id, true); 
+                        if(window.innerWidth <= 768) {
+                            MobileManager.switchTab('editor'); // Alterna automaticamente para o editor no mobile
+                        }
                     }
                 };
                 wrapper.appendChild(row);
@@ -859,7 +992,6 @@
                 return wrapper;
             },
 
-            // Navegação e Busca
             findNode: (nodes, id) => {
                 for (let node of nodes) {
                     if (node.id === id) return node;
@@ -900,7 +1032,6 @@
                 TreeManager.renderTree(filteredData);
             },
 
-            // CRUD de Nós
             createNode: (parentId, type) => {
                 const newNode = { id: AppUtils.generateId(), type: type, title: type === 'folder' ? 'Nova Pasta' : 'Nova Página' };
                 if (type === 'folder') { newNode.children = []; newNode.isOpen = true; }
@@ -917,8 +1048,12 @@
                 
                 DOM.searchBar.value = ''; 
                 Database.saveTreeData();
-                if (type === 'page') EditorManager.loadPage(newNode.id, true); 
-                else TreeManager.renderTree();
+                if (type === 'page') {
+                    EditorManager.loadPage(newNode.id, true);
+                    if(window.innerWidth <= 768) MobileManager.switchTab('editor');
+                } else { 
+                    TreeManager.renderTree();
+                }
             },
 
             deleteNode: (id) => {
@@ -941,6 +1076,7 @@
                     } else { 
                         DOM.titleEditor.value = ''; 
                         DOM.contentEditor.innerHTML = ''; 
+                        DOM.pageTagsInput.value = '';
                         AppState.activePageId = null; 
                         EditorManager.updateWordCount(); 
                     }
@@ -962,7 +1098,6 @@
                 }
             },
 
-            // Drag and Drop Lógica
             handleDragStart: (e, id) => {
                 AppState.draggedItemId = id;
                 e.dataTransfer.effectAllowed = 'move';
@@ -1061,7 +1196,7 @@
         };
 
         /**
-         * Lógica do Editor de Texto e Imagens
+         * Lógica do Editor de Texto, Metadados e Imagens
          */
         const EditorManager = {
             async loadPage(id, animate = true) {
@@ -1071,19 +1206,23 @@
                 AppState.activePageId = id;
                 DOM.titleEditor.value = pageNode.title;
                 DOM.contentEditor.innerHTML = "Carregando...";
+                DOM.pageTagsInput.value = "";
                 
-                const content = await Database.getPageContent(id);
-                DOM.contentEditor.innerHTML = content;
-                TreeManager.renderTree(); // Atualiza a seleção visual
+                const pageData = await Database.getPageData(id);
+                DOM.contentEditor.innerHTML = pageData.content;
+                DOM.pageTagsInput.value = pageData.tags || "";
+
+                TreeManager.renderTree();
                 
                 if (animate) {
                     DOM.contentEditor.classList.remove('page-turn-anim');
                     DOM.titleEditor.classList.remove('page-turn-anim');
-                    void DOM.contentEditor.offsetWidth; // Trigger reflow
+                    void DOM.contentEditor.offsetWidth;
                     DOM.contentEditor.classList.add('page-turn-anim');
                     DOM.titleEditor.classList.add('page-turn-anim');
                 }
                 EditorManager.updateWordCount();
+                EditorManager.bindInternalLinks();
             },
 
             saveCurrentPage: () => {
@@ -1096,8 +1235,12 @@
                     if (activeEl) activeEl.textContent = pageNode.title;
                     
                     Database.saveTreeData();
-                    Database.savePageContent(AppState.activePageId, DOM.contentEditor.innerHTML);
+                    Database.savePageData(AppState.activePageId, DOM.contentEditor.innerHTML, DOM.pageTagsInput.value);
                 }
+            },
+
+            saveMetadata: () => {
+                EditorManager.saveCurrentPage();
             },
 
             updateWordCount: () => {
@@ -1113,12 +1256,85 @@
                 document.execCommand(command, false, value);
                 DOM.contentEditor.focus(); 
                 EditorManager.saveCurrentPage();
+                EditorManager.bindInternalLinks();
             },
 
-            /**
-             * Comprime a imagem colada/arrastada antes de transformá-la em Base64
-             * Isso é vital para não exceder o limite de 1MB do documento no Firestore.
-             */
+            // Tamanho de Fonte customizado em pixels
+            setCustomFontSize: (sizePx) => {
+                const selection = window.getSelection();
+                if (!selection.rangeCount) return;
+                const range = selection.getRangeAt(0);
+                if (range.collapsed) {
+                    AppUtils.showToast("Selecione um texto para alterar o tamanho.");
+                    return;
+                }
+                const span = document.createElement('span');
+                span.style.fontSize = sizePx + 'px';
+                span.appendChild(range.extractContents());
+                range.insertNode(span);
+                EditorManager.saveCurrentPage();
+            },
+
+            // Inserir Links Internos
+            insertInternalLinkPrompt: () => {
+                const allPages = [];
+                const collectPages = (nodes) => {
+                    nodes.forEach(n => {
+                        if (n.type === 'page') allPages.push(n);
+                        if (n.children) collectPages(n.children);
+                    });
+                };
+                collectPages(AppState.treeData);
+
+                if (allPages.length === 0) {
+                    AppUtils.showToast("Não há outras páginas disponíveis.");
+                    return;
+                }
+
+                let promptText = "Escolha o número da página para linkar:\n";
+                allPages.forEach((p, idx) => {
+                    promptText += `[${idx + 1}] ${p.title}\n`;
+                });
+
+                const choice = prompt(promptText);
+                const index = parseInt(choice) - 1;
+
+                if (isNaN(index) || !allPages[index]) return;
+
+                const targetPage = allPages[index];
+                const selection = window.getSelection();
+                const selectedText = selection.toString() || targetPage.title;
+
+                const linkHtml = `<a href="#" onclick="EditorManager.navigateToPage('${targetPage.id}'); return false;" class="internal-link" data-page-id="${targetPage.id}">${selectedText}</a>`;
+                
+                document.execCommand('insertHTML', false, linkHtml);
+                EditorManager.saveCurrentPage();
+                EditorManager.bindInternalLinks();
+            },
+
+            navigateToPage: (pageId) => {
+                const node = TreeManager.findNode(AppState.treeData, pageId);
+                if (node) {
+                    EditorManager.loadPage(pageId, true);
+                    if(window.innerWidth <= 768) {
+                        MobileManager.switchTab('editor');
+                    }
+                } else {
+                    AppUtils.showToast("Página não encontrada.");
+                }
+            },
+
+            bindInternalLinks: () => {
+                const links = DOM.contentEditor.querySelectorAll('.internal-link');
+                links.forEach(link => {
+                    link.onclick = (e) => {
+                        e.preventDefault();
+                        const pageId = link.getAttribute('data-page-id');
+                        if (pageId) EditorManager.navigateToPage(pageId);
+                    };
+                });
+            },
+
             handleImageUpload: (file) => {
                 if (!file.type.startsWith('image/')) return;
                 
@@ -1126,7 +1342,6 @@
                 reader.onload = (e) => {
                     const img = new Image();
                     img.onload = () => {
-                        // Limites máximos para compressão
                         const MAX_WIDTH = 1200;
                         const MAX_HEIGHT = 1200;
                         let width = img.width;
@@ -1146,7 +1361,6 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // Comprime para JPEG com 80% de qualidade (previne documentos gigantes no db)
                         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
                         document.execCommand('insertImage', false, compressedBase64);
                         EditorManager.saveCurrentPage();
@@ -1246,7 +1460,7 @@
                 if (firstPage) AppState.activePageId = firstPage.id;
 
                 TreeManager.renderTree();
-                if (AppState.activePageId) EditorManager.loadPage(AppState.activePageId, false);
+                if (AppState.activePageId) await EditorManager.loadPage(AppState.activePageId, false);
                 
                 EditorManager.initImageResizer();
                 this.setupDragAndDropTextEditor();
